@@ -1,0 +1,39 @@
+# Production dependencies for JobSniper ET
+
+# Telegram Bot Framework (Asyncio, FSM, Rich Keyboards)
+aiogram>=3.17.0
+
+# Database & Vector Search
+SQLAlchemy>=2.0.36
+asyncpg>=0.30.0
+greenlet>=3.1.0
+pgvector>=0.3.6
+alembic>=1.14.0
+
+# Web Admin Dashboard & Telemetry API
+fastapi>=0.115.0
+uvicorn>=0.32.0
+
+# Cache, Rate Limiting & Queue
+redis>=5.2.1
+
+# Settings & Validation
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+
+# Pure Async HTTP Client for Google Gemini API & Webhooks
+httpx>=0.28.0
+
+# Document & Audio Processing
+pymupdf>=1.25.0
+python-docx>=1.1.2
+
+# Security & Encryption (AES-256-GCM)
+cryptography>=44.0.0
+
+# MTProto Ingestion Client (Multi-Channel Real-time Listener)
+telethon>=1.38.0
+
+# Utilities
+python-dotenv>=1.0.1
+aiofiles>=24.1.0

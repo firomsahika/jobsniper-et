@@ -1,0 +1,50 @@
+{
+  "welcome_title": "🎯 <b>JobSniper ET</b> — AI Job Matcher & Career Coach",
+  "welcome_body": "Welcome, <b>{name}</b>!\n\nI continuously monitor <b>50+ Ethiopian job channels</b> 24/7 (HaHuJobs, Ethiojobs, Freelance Ethiopia, NGO vacancies, and more) to find high-match opportunities tailored to your profile.\n\n✨ <b>What I do for you:</b>\n• <b>Real-time AI Match Alerts:</b> Instant alerts when opportunities hit your 80%+ threshold.\n• <b>Instant Cover Letters:</b> Tailored 3-paragraph drafts mapping your exact skills to the role.\n• <b>AI Mock Interview Coach:</b> 5-question STAR simulation via text or voice notes with instant feedback.",
+  "select_language": "🌐 <b>Please choose your preferred language:</b>",
+  "onboarding_prompt": "📄 <b>Set Up Your Career Profile</b>\n\nTo start receiving sniper alerts, please choose how you want to build your profile:",
+  "btn_upload_cv": "📎 Upload CV (PDF / Word)",
+  "btn_wizard": "✍️ Guided 4-Step Builder (No CV)",
+  "btn_profile": "👤 My Profile",
+  "btn_interview": "🎙️ Practice Mock Interview",
+  "btn_help": "ℹ️ Help & Commands",
+  "btn_settings": "⚙️ Match Preferences",
+  
+  "upload_cv_instructions": "📤 <b>Upload Your Resume / CV</b>\n\nPlease send your CV as a file attachment (<b>PDF</b> or <b>DOCX</b> format, up to 10MB).\n\n🔒 <i>Your CV is encrypted with bank-grade AES-256-GCM. We never share your data.</i>",
+  "cv_processing": "⏳ <b>Analyzing your CV with Gemini AI...</b>\n• Extracting professional experience\n• Identifying core skills & competencies\n• Generating vector embedding profile\n\nPlease wait a few seconds...",
+  "cv_success": "✅ <b>Profile Successfully Created!</b>\n\n👤 <b>Name:</b> {name}\n💼 <b>Title:</b> {title}\n🎓 <b>Education:</b> {education}\n⏳ <b>Experience:</b> {experience} years\n🛠️ <b>Top Skills:</b> {skills}\n\n🎯 <i>Your sniper radar is now ACTIVE! You'll receive real-time notifications for roles matching {threshold}% or higher.</i>",
+  "cv_error": "⚠️ <b>Could not read document</b>\nPlease ensure you upload a valid PDF or Word (.docx) document containing readable text.",
+
+  "wizard_step1": "🎓 <b>Step 1 of 4: Education & Field of Study</b>\n\nWhat is your highest degree and field of study?\n<i>Example: B.Sc. in Computer Science or BA in Management</i>",
+  "wizard_step2": "💼 <b>Step 2 of 4: Professional Experience</b>\n\nHow many years of experience do you have, and what is your primary job title?\n<i>Example: 2 years as Junior Frontend Developer or Fresh Graduate / Entry Level</i>",
+  "wizard_step3": "🛠️ <b>Step 3 of 4: Core Skills</b>\n\nWhat are your strongest technical or professional skills? (Separate with commas)\n<i>Example: Python, FastAPI, PostgreSQL, Git, Team Leadership</i>",
+  "wizard_step4": "📍 <b>Step 4 of 4: Preferences & Location</b>\n\nWhat work arrangement and location do you prefer?\n<i>Example: Full-time in Addis Ababa, or Remote Tech Roles</i>",
+  "wizard_completed": "🎉 <b>Profile Created via Guided Builder!</b>\n\nWe've indexed your preferences. You are now ready to receive personalized sniper match alerts!",
+
+  "profile_view": "👤 <b>Your Candidate Profile</b>\n\n<b>Name:</b> {name}\n<b>Primary Title:</b> {title}\n<b>Experience:</b> {experience} years\n<b>Key Skills:</b> {skills}\n\n⚙️ <b>Current Alert Preferences:</b>\n• <b>Match Threshold:</b> <code>{threshold}%</code>\n• <b>Quiet Hours:</b> <code>{quiet_start} - {quiet_end} (EAT)</code>\n• <b>Alert Status:</b> {status_badge}",
+  "btn_edit_threshold": "🎯 Change Match Score ({threshold}%)",
+  "btn_edit_quiet": "🌙 Set Quiet Hours",
+  "btn_toggle_active": "{toggle_text}",
+  "btn_delete_data": "🗑️ Delete My Data",
+
+  "alert_header": "🎯 <b>NEW JOB MATCH: {score}% Score</b>\n\n💼 <b>{title}</b>\n🏢 <b>{company}</b>\n📍 {location} | ⏳ <b>Deadline:</b> {deadline}\n\n💡 <b>Alignment Strengths:</b>\n{strengths}\n\n⚠️ <b>Skill Gap Advisory:</b>\n{gap}\n\n📢 <i>Source: {source}</i>",
+  "btn_generate_cover": "📝 Generate Cover Letter",
+  "btn_mock_interview": "🎙️ Practice Mock Interview",
+  "btn_view_original": "🔗 View Original Post",
+  "btn_mark_applied": "✅ Mark Applied",
+  "btn_not_relevant": "❌ Not Relevant",
+
+  "cover_letter_generating": "✍️ <b>Crafting your tailored cover letter...</b>\nAligning your qualifications with this specific job description.",
+  "cover_letter_ready": "📄 <b>Tailored Cover Letter Draft</b>\n\n<code>{letter}</code>\n\n💡 <i>Tap the text above to copy it instantly. Customize bracketed details before sending!</i>",
+
+  "interview_intro": "🎙️ <b>AI Mock Interview Coach (STAR Method)</b>\n\nTarget Role: <b>{title}</b> at <b>{company}</b>\n\nWe'll conduct a realistic <b>5-question simulation</b>:\n1️⃣ Professional Pitch & Background\n2️⃣ Technical / Competency Deep Dive\n3️⃣ Behavioral Challenge (STAR Method)\n4️⃣ Problem-Solving Under Pressure\n5️⃣ Cultural Fit & Closing Impact\n\nHow would you like to answer?",
+  "btn_mode_text": "⌨️ Text Responses",
+  "btn_mode_voice": "🎙️ Voice Notes (Telegram Audio)",
+  "interview_started": "🚀 <b>Mock Interview Started!</b>\n\nRespond in English using {mode_text}.\nTake a breath and answer professionally.",
+  "interview_q_header": "<b>Question {num} of 5:</b>\n\n<i>{question}</i>\n\n{mode_instruction}",
+  "interview_text_hint": "👉 <i>Type your answer below and send.</i>",
+  "interview_voice_hint": "👉 <i>Record and send a voice note (under 2 minutes).</i>",
+  "interview_evaluating": "🤔 <i>Evaluating your response...</i>",
+  "interview_completed": "🏁 <b>Mock Interview Simulation Complete!</b>\n\n📊 <b>Performance Assessment Report:</b>\n\n🎯 <b>Overall Readiness Score:</b> <code>{score}/10.0</code>\n\n• <b>Technical Substance:</b> {tech_score}/10\n• <b>STAR Structure:</b> {star_score}/10\n• <b>Clarity & Articulation:</b> {comm_score}/10\n\n📋 <b>Key Feedback:</b>\n{feedback}\n\n⭐ <b>Top Recommendation:</b>\n{recommendation}"
+}
+

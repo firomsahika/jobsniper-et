@@ -1,0 +1,131 @@
+services:
+  # ==============================================================
+  # Database: PostgreSQL 16 with pgvector extension
+  # ==============================================================
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: jobsniper-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-jobsniper}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jobsniper_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-jobsniper_db}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5434}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jobsniper} -d ${POSTGRES_DB:-jobsniper_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - jobsniper-net
+
+  # ==============================================================
+  # Cache & Rate Limiting: Redis 7
+  # ==============================================================
+  redis:
+    image: redis:7-alpine
+    container_name: jobsniper-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - jobsniper-net
+
+  # ==============================================================
+  # Web Admin Dashboard & Telemetry (FastAPI UI)
+  # ==============================================================
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jobsniper-dashboard
+    restart: unless-stopped
+    command: python -m src.main --service dashboard
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-jobsniper}:${POSTGRES_PASSWORD:-jobsniper_secure_password}@postgres:5432/${POSTGRES_DB:-jobsniper_db}
+      REDIS_URL: redis://redis:6379/0
+      DASHBOARD_PORT: 8080
+    ports:
+      - "${DASHBOARD_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - jobsniper-net
+
+  # ==============================================================
+  # Telegram Bot Service (aiogram v3)
+  # ==============================================================
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jobsniper-bot
+    restart: unless-stopped
+    command: python -m src.main --service bot
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-jobsniper}:${POSTGRES_PASSWORD:-jobsniper_secure_password}@postgres:5432/${POSTGRES_DB:-jobsniper_db}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    networks:
+      - jobsniper-net
+
+  # ==============================================================
+  # Ingestion & Matching Service (Telethon Channel Listener & Matcher)
+  # ==============================================================
+  ingestion:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jobsniper-ingestion
+    restart: unless-stopped
+    command: python -m src.main --service ingestion
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-jobsniper}:${POSTGRES_PASSWORD:-jobsniper_secure_password}@postgres:5432/${POSTGRES_DB:-jobsniper_db}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./sessions:/app/sessions
+      - ./logs:/app/logs
+    networks:
+      - jobsniper-net
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  jobsniper-net:
+    driver: bridge

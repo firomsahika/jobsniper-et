@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobSniper ET — Control Center & Telemetry</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8f9fa;
+    }
+    .sidebar-active {
+      background-color: #f1f0eb;
+      color: #1a1a1a;
+      font-weight: 600;
+    }
+    .badge-purple {
+      background-color: #f5f3ff;
+      color: #6d28d9;
+      border: 1px solid #ddd6fe;
+    }
+    .badge-green {
+      background-color: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+    }
+    .badge-blue {
+      background-color: #eff6ff;
+      color: #2563eb;
+      border: 1px solid #bfdbfe;
+    }
+  </style>
+</head>
+<body class="flex h-screen overflow-hidden text-gray-800">
+
+  <!-- ============================================================== -->
+  <!-- LEFT SIDEBAR -->
+  <!-- ============================================================== -->
+  <aside class="w-64 bg-white border-r border-gray-200/80 flex flex-col justify-between shrink-0 select-none">
+    <div>
+      <!-- Brand Header -->
+      <div class="h-16 flex items-center justify-between px-6 border-b border-gray-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-black text-white flex items-center justify-center font-bold text-sm tracking-tighter">
+            JS
+          </div>
+          <div>
+            <div class="font-extrabold text-sm tracking-tight leading-none text-gray-900">JobSniper ET</div>
+            <div class="text-[10px] text-gray-400 font-medium tracking-tight">AI Career Radar</div>
+          </div>
+        </div>
+        <button class="text-gray-400 hover:text-gray-600 transition p-1 rounded-md hover:bg-gray-100">
+          <i data-lucide="panel-left-close" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="p-4 space-y-1">
+        <a href="#overview" onclick="switchTab('overview')" id="nav-overview" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100/70 transition">
+          <i data-lucide="layout-grid" class="w-4 h-4 text-gray-500"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="#candidates" onclick="switchTab('candidates')" id="nav-candidates" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100/70 transition">
+          <i data-lucide="users" class="w-4 h-4 text-gray-500"></i>
+          <span>Profile & Users</span>
+        </a>
+
+        <a href="#applications" onclick="switchTab('applications')" id="nav-applications" class="sidebar-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
+          <i data-lucide="briefcase" class="w-4 h-4 text-gray-700"></i>
+          <span>Applications & Jobs</span>
+        </a>
+
+        <a href="#matches" onclick="switchTab('matches')" id="nav-matches" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100/70 transition">
+          <i data-lucide="crosshair" class="w-4 h-4 text-gray-500"></i>
+          <span>AI Matches & Alerts</span>
+        </a>
+
+        <a href="#interviews" onclick="switchTab('interviews')" id="nav-interviews" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100/70 transition">
+          <i data-lucide="mic" class="w-4 h-4 text-gray-500"></i>
+          <span>Mock Interviews</span>
+        </a>
+
+        <a href="#channels" onclick="switchTab('channels')" id="nav-channels" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100/70 transition">
+          <i data-lucide="radio" class="w-4 h-4 text-gray-500"></i>
+          <span>Monitored Channels (31)</span>
+        </a>
+
+        <a href="#finance" onclick="switchTab('finance')" id="nav-finance" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100/70 transition">
+          <i data-lucide="wallet" class="w-4 h-4 text-gray-500"></i>
+          <span>Finance & Pro</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- User Profile Pill at Bottom of Sidebar -->
+    <div class="p-4 border-t border-gray-100">
+      <div class="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100/80 cursor-pointer transition">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-black text-white font-bold text-xs flex items-center justify-center tracking-wider">
+            FH
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-xs font-semibold text-gray-900 truncate">Firomsa Hika</div>
+            <div class="text-[11px] text-gray-400 truncate">firomsahika2022@gmail.com</div>
+          </div>
+        </div>
+        <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================================== -->
+  <!-- MAIN CONTENT AREA -->
+  <!-- ============================================================== -->
+  <main class="flex-1 flex flex-col overflow-y-auto">
+
+    <!-- Top Header Bar -->
+    <header class="h-16 bg-white/70 backdrop-blur-md border-b border-gray-200/70 flex items-center justify-between px-8 shrink-0 sticky top-0 z-10">
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-full flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          Ingestion Active (31 Channels)
+        </span>
+        <span class="text-xs text-gray-400 font-medium">Free Tier Guard: <b class="text-gray-700">14 RPM Max</b></span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="refreshData()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Live Refresh</span>
+        </button>
+        <a href="https://t.me/" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-black hover:bg-gray-800 rounded-lg transition shadow-sm">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          <span>Open Bot</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="p-8 max-w-6xl mx-auto w-full">
+
+      <!-- Page Title & Icon (Matching Screenshot Structure) -->
+      <div class="flex items-start gap-3.5 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 mt-0.5">
+          <i data-lucide="briefcase" class="w-5 h-5 text-stone-700"></i>
+        </div>
+        <div>
+          <h1 id="page-title" class="text-2xl font-extrabold text-gray-900 tracking-tight">My Applications</h1>
+          <p id="page-subtitle" class="text-sm text-gray-500 mt-0.5">Track your application and interview progress across monitored vacancies</p>
+        </div>
+      </div>
+
+      <!-- Quick KPI Stats Bar -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
+        <div class="bg-white rounded-2xl p-4 border border-gray-200/70 shadow-sm">
+          <div class="text-xs text-gray-400 font-medium uppercase tracking-wider">Candidates Joined</div>
+          <div id="stat-candidates" class="text-2xl font-extrabold text-gray-900 mt-1">--</div>
+          <div class="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
+            <i data-lucide="trending-up" class="w-3 h-3"></i> <span id="stat-active-rate">100% active</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200/70 shadow-sm">
+          <div class="text-xs text-gray-400 font-medium uppercase tracking-wider">Ingested Vacancies</div>
+          <div id="stat-jobs" class="text-2xl font-extrabold text-gray-900 mt-1">--</div>
+          <div class="text-[11px] text-blue-600 font-medium mt-1 flex items-center gap-1">
+            <i data-lucide="radio" class="w-3 h-3"></i> <span>31 Channels Monitored</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200/70 shadow-sm">
+          <div class="text-xs text-gray-400 font-medium uppercase tracking-wider">AI Sniper Matches</div>
+          <div id="stat-matches" class="text-2xl font-extrabold text-gray-900 mt-1">--</div>
+          <div class="text-[11px] text-purple-600 font-medium mt-1 flex items-center gap-1">
+            <i data-lucide="target" class="w-3 h-3"></i> <span>Two-stage Hybrid Match</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200/70 shadow-sm">
+          <div class="text-xs text-gray-400 font-medium uppercase tracking-wider">Interview Sessions</div>
+          <div id="stat-interviews" class="text-2xl font-extrabold text-gray-900 mt-1">--</div>
+          <div class="text-[11px] text-amber-600 font-medium mt-1 flex items-center gap-1">
+            <i data-lucide="star" class="w-3 h-3"></i> <span id="stat-avg-score">STAR Framework</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Tabs (Exact Match to Screenshot) -->
+      <div class="flex items-center gap-2 mb-6 select-none">
+        <button onclick="filterCategory('all')" id="tab-all" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition">
+          <span>All</span>
+          <span id="badge-all" class="bg-white text-gray-900 font-bold px-1.5 py-0.2 rounded-full text-[10px]">3</span>
+        </button>
+
+        <button onclick="filterCategory('active')" id="tab-active" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
+          <span>Active</span>
+          <span id="badge-active" class="bg-gray-200 text-gray-600 font-bold px-1.5 py-0.2 rounded-full text-[10px]">1</span>
+        </button>
+
+        <button onclick="filterCategory('completed')" id="tab-completed" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
+          <span>Completed</span>
+          <span id="badge-completed" class="bg-gray-200 text-gray-600 font-bold px-1.5 py-0.2 rounded-full text-[10px]">2</span>
+        </button>
+      </div>
+
+      <!-- Dynamic Cards Container -->
+      <div id="cards-container" class="space-y-4">
+        <!-- Rendered dynamically by JavaScript -->
+        <div class="text-center py-12 text-gray-400">Loading live data...</div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT LOGIC & API CONNECTIVITY -->
+  <!-- ============================================================== -->
+  <script>
+    let currentTab = 'applications';
+    let currentFilter = 'all';
+    let allData = [];
+
+    // Initialize Lucide icons
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      fetchAnalytics();
+      fetchApplications();
+    });
+
+    async function fetchAnalytics() {
+      try {
+        const res = await fetch('/api/analytics');
+        const data = await res.json();
+        
+        document.getElementById('stat-candidates').innerText = data.candidates.total;
+        document.getElementById('stat-jobs').innerText = data.jobs.total;
+        document.getElementById('stat-matches').innerText = data.matches.total;
+        document.getElementById('stat-interviews').innerText = data.interviews.total;
+        
+        if (data.interviews.average_score > 0) {
+          document.getElementById('stat-avg-score').innerText = `Avg Score: ${data.interviews.average_score}/10`;
+        }
+      } catch (err) {
+        console.warn('Analytics endpoint offline or running in mock mode', err);
+      }
+    }
+
+    async function fetchApplications() {
+      try {
+        const res = await fetch('/api/jobs?limit=25');
+        const jobs = await res.json();
+
+        if (jobs && jobs.length > 0) {
+          allData = jobs.map((j, idx) => ({
+            id: j.id,
+            title: j.title || "Software Engineer",
+            company: j.company || "Ethiopian Tech",
+            channel: j.source_channel || "@hahujobs",
+            statusBadge: idx === 0 ? "Interview under review" : "Qualified for role",
+            badgeType: idx === 0 ? "purple" : "green",
+            notice: idx === 0 ? "Interview simulation pending. Review your STAR responses." : "All steps completed. You'll be contacted with next steps.",
+            skills: j.skills || ["Python", "FastAPI", "PostgreSQL"],
+            category: idx === 0 ? "active" : "completed",
+            experience: j.required_experience || 2,
+            deadline: j.deadline || "Open"
+          }));
+        } else {
+          // Default realistic preview matching user's uploaded screenshot exactly
+          allData = [
+            {
+              id: '1',
+              title: "React and Next.Js Engineer",
+              statusBadge: "Interview under review",
+              badgeType: "purple",
+              notice: "Interview simulation active. Prepare 5 STAR questions via Telegram bot.",
+              skills: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+              category: "active",
+              company: "Addis FinTech Solutions",
+              channel: "@freelance_ethiopia",
+              deadline: "Nov 30, 2026",
+              experience: 3
+            },
+            {
+              id: '2',
+              title: "Ubuntu/Linux User for AI Data Training",
+              statusBadge: "Qualified for role",
+              badgeType: "green",
+              notice: "All steps completed. You'll be contacted with next steps.",
+              skills: ["Linux", "Ubuntu", "Bash Scripting", "Data Annotation"],
+              category: "completed",
+              company: "Global AI Work Africa",
+              channel: "@hahujobs",
+              deadline: "Dec 05, 2026",
+              experience: 1
+            },
+            {
+              id: '3',
+              title: "Full Stack Engineer (Node.js and React)",
+              statusBadge: "Qualified for role",
+              badgeType: "green",
+              notice: "All steps completed. You'll be contacted with next steps.",
+              skills: ["Node.js", "React", "PostgreSQL", "Docker", "REST API"],
+              category: "completed",
+              company: "Ethio Digital Services PLC",
+              channel: "@ethiojobs_et",
+              deadline: "Dec 10, 2026",
+              experience: 4
+            }
+          ];
+        }
+
+        renderCards();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderCards() {
+      const container = document.getElementById('cards-container');
+      container.innerHTML = '';
+
+      let filtered = allData;
+      if (currentFilter !== 'all') {
+        filtered = allData.filter(item => item.category === currentFilter);
+      }
+
+      // Update badge counts
+      const activeCount = allData.filter(d => d.category === 'active').length;
+      const completedCount = allData.filter(d => d.category === 'completed').length;
+      document.getElementById('badge-all').innerText = allData.length;
+      document.getElementById('badge-active').innerText = activeCount;
+      document.getElementById('badge-completed').innerText = completedCount;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-12 text-center border border-gray-200/80">
+            <i data-lucide="inbox" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i>
+            <div class="text-sm font-semibold text-gray-700">No applications in this view</div>
+            <div class="text-xs text-gray-400 mt-1">Posts will appear here as channels publish new vacancies.</div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach(item => {
+        const badgeClass = item.badgeType === 'purple' ? 'badge-purple' : 'badge-green';
+        const cardHtml = `
+          <div class="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm hover:shadow-md transition">
+            <!-- Header Row -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <h3 class="text-base font-bold text-gray-900 tracking-tight">${item.title}</h3>
+                <span class="${badgeClass} px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1">
+                  ${item.badgeType === 'green' ? '<i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i>' : ''}
+                  ${item.statusBadge}
+                </span>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <button title="More Information" class="text-gray-400 hover:text-gray-600 p-1">
+                  <i data-lucide="info" class="w-4 h-4"></i>
+                </button>
+                <button onclick="toggleDetails('${item.id}')" class="text-xs font-semibold text-gray-600 hover:text-gray-900 flex items-center gap-1 transition">
+                  <span>Details</span>
+                  <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Notice Strip (Exact Screenshot Styling) -->
+            <div class="bg-stone-50 border border-stone-200/60 text-stone-700 rounded-xl px-4 py-2.5 mt-3 text-xs flex items-center gap-2">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5 text-stone-500 shrink-0"></i>
+              <span>${item.notice}</span>
+            </div>
+
+            <!-- Collapsible Drawer -->
+            <div id="details-${item.id}" class="hidden pt-4 mt-4 border-t border-gray-100 text-xs text-gray-600 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <span class="text-gray-400 block font-medium">Hiring Employer</span>
+                <span class="font-semibold text-gray-800">${item.company || 'Not Specified'}</span>
+              </div>
+              <div>
+                <span class="text-gray-400 block font-medium">Telegram Channel</span>
+                <span class="font-semibold text-gray-800">${item.channel || 'Telegram'}</span>
+              </div>
+              <div>
+                <span class="text-gray-400 block font-medium">Application Deadline</span>
+                <span class="font-semibold text-gray-800">${item.deadline || 'Open'}</span>
+              </div>
+              <div>
+                <span class="text-gray-400 block font-medium">Required Experience</span>
+                <span class="font-semibold text-gray-800">${item.experience} years</span>
+              </div>
+              <div class="col-span-2 md:col-span-4 mt-1">
+                <span class="text-gray-400 block font-medium mb-1.5">Required Skills:</span>
+                <div class="flex flex-wrap gap-1.5">
+                  ${(item.skills || []).map(s => `<span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md font-medium text-[11px]">${s}</span>`).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', cardHtml);
+      });
+
+      lucide.createIcons();
+    }
+
+    function toggleDetails(id) {
+      const el = document.getElementById(`details-${id}`);
+      if (el) {
+        el.classList.toggle('hidden');
+      }
+    }
+
+    function filterCategory(category) {
+      currentFilter = category;
+      
+      const tabAll = document.getElementById('tab-all');
+      const tabActive = document.getElementById('tab-active');
+      const tabCompleted = document.getElementById('tab-completed');
+
+      [tabAll, tabActive, tabCompleted].forEach(t => {
+        t.className = "px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition";
+      });
+
+      const activeBadge = "px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition";
+
+      if (category === 'all') tabAll.className = activeBadge;
+      if (category === 'active') tabActive.className = activeBadge;
+      if (category === 'completed') tabCompleted.className = activeBadge;
+
+      renderCards();
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      
+      // Update sidebar highlight
+      document.querySelectorAll('aside nav a').forEach(a => {
+        a.classList.remove('sidebar-active');
+        a.classList.add('text-gray-600');
+      });
+
+      const activeLink = document.getElementById(`nav-${tab}`);
+      if (activeLink) {
+        activeLink.classList.add('sidebar-active');
+        activeLink.classList.remove('text-gray-600');
+      }
+
+      // Adjust Title
+      const titles = {
+        'overview': ['Control Center & Analytics', 'Real-time telemetry, 2-stage match rates, and system health'],
+        'candidates': ['Registered Candidates', 'Manage users, CV embeddings, and language configurations'],
+        'applications': ['My Applications', 'Track your application and interview progress'],
+        'matches': ['AI Matches & Alerts', 'High-confidence alerts dispatched to Ethiopian job seekers'],
+        'interviews': ['Mock Interview Sessions', 'STAR framework transcripts and candidate readiness evaluations'],
+        'channels': ['Monitored Ethiopian Channels', '31+ verified public channels listening 24/7'],
+        'finance': ['Finance & Subscription Tier', 'Local payment telemetry (Chapa & Telebirr integration)']
+      };
+
+      const [title, subtitle] = titles[tab] || titles['applications'];
+      document.getElementById('page-title').innerText = title;
+      document.getElementById('page-subtitle').innerText = subtitle;
+    }
+
+    function refreshData() {
+      fetchAnalytics();
+      fetchApplications();
+    }
+  </script>
+</body>
+</html>
