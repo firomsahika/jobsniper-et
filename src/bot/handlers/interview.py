@@ -21,7 +21,10 @@ router = Router()
 
 
 @router.message(Command("interview"))
-@router.message(F.text.in_(["🎙️ Mock Interview", "🎙️ ቃለ መጠይቅ", "🎙️ Shaakala"]))
+@router.message(F.text.in_([
+    "🎙️ Mock Interview", "Mock Interview", "🎙️ ቃለ-መጠይቅ", "🎙️ ቃለ መጠይቅ",
+    "ቃለ-መጠይቅ", "ቃለ መጠይቅ", "🎙️ Shaakala", "Shaakala"
+]))
 @router.callback_query(F.data.startswith("mockint:"))
 async def prompt_interview_mode(event: [Message, CallbackQuery], lang: str, i18n: I18nManager):
     """Initiates interview: shows overview and prompts text vs voice mode."""

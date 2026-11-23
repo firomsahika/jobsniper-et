@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str = Field(default="")
     TELEGRAM_WEBHOOK_URL: Optional[str] = Field(default=None)
     TELEGRAM_WEBHOOK_SECRET: Optional[str] = Field(default=None)
+    TELEGRAM_WEBAPP_URL: Optional[str] = Field(default=None)
 
     # Gemini AI
     GEMINI_API_KEY: str = Field(default="")

@@ -9,7 +9,7 @@ router = Router()
 
 
 @router.message(Command("help"))
-@router.message(F.text.in_(["ℹ️ Help", "ℹ️ እገዛ", "ℹ️ Gargaarsa"]))
+@router.message(F.text.in_(["ℹ️ Help", "Help", "help", "ℹ️ እገዛ", "እገዛ", "ℹ️ Gargaarsa", "Gargaarsa"]))
 async def show_help(message: Message, lang: str, i18n: I18nManager):
     help_card = (
         "📖 <b>JobSniper ET — User Guide & Commands</b>\n\n"

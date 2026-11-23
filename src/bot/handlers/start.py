@@ -67,16 +67,28 @@ async def handle_language_choice(callback: CallbackQuery, state: FSMContext, i18
                 ui_language=selected_lang,
             )
 
-    await callback.answer()
-    
-    welcome = i18n.get("welcome_body", lang=selected_lang, name=name)
-    onboard_prompt = i18n.get("onboarding_prompt", lang=selected_lang)
+    has_profile = bool(candidate and candidate.structured_profile)
 
-    await callback.message.edit_text(
-        f"{i18n.get('welcome_title', lang=selected_lang)}\n\n{welcome}\n\n{onboard_prompt}",
-        reply_markup=get_onboarding_choice_kb(lang=selected_lang),
-        parse_mode="HTML",
-    )
+    await callback.answer(f"Language updated!")
+
+    if has_profile:
+        lang_names = {"en": "English", "am": "አማርኛ", "om": "Afaan Oromoo"}
+        confirm_text = f"✅ <b>Language switched to {lang_names.get(selected_lang, selected_lang)}!</b>\n\nYour preferences and notifications will now appear in your selected language."
+        await callback.message.edit_text(confirm_text, parse_mode="HTML")
+        await callback.message.answer(
+            "📋 <b>Main Menu</b>\n\nSelect an option below to continue:",
+            reply_markup=get_main_menu_reply_kb(lang=selected_lang),
+            parse_mode="HTML"
+        )
+    else:
+        welcome = i18n.get("welcome_body", lang=selected_lang, name=name)
+        onboard_prompt = i18n.get("onboarding_prompt", lang=selected_lang)
+
+        await callback.message.edit_text(
+            f"{i18n.get('welcome_title', lang=selected_lang)}\n\n{welcome}\n\n{onboard_prompt}",
+            reply_markup=get_onboarding_choice_kb(lang=selected_lang),
+            parse_mode="HTML",
+        )
 
 
 @router.callback_query(F.data == "cancel_action")
