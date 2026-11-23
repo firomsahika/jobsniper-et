@@ -5,7 +5,12 @@ Ensures the pgvector extension is enabled and builds all tables and HNSW vector 
 
 import asyncio
 import logging
+import os
 import sys
+
+# Ensure root directory is in sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from sqlalchemy import text
 from src.db.session import engine, Base
 from src.db.models import Candidate, Job, JobMatch, MockInterview

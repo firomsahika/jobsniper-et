@@ -26,7 +26,7 @@ services:
   # Cache & Rate Limiting: Redis 7
   # ==============================================================
   redis:
-    image: redis:7-alpine
+    image: redis:latest
     container_name: jobsniper-redis
     restart: unless-stopped
     command: redis-server --appendonly yes

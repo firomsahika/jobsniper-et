@@ -6,6 +6,12 @@ Populates PostgreSQL with realistic vacancies from HaHuJobs, Ethiojobs, and Free
 import asyncio
 from datetime import datetime, timezone
 import logging
+import os
+import sys
+
+# Ensure root directory is in sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from src.db.session import async_session_factory
 from src.ingestion.parser import IngestionPipeline
 

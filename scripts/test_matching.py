@@ -2,6 +2,12 @@
 
 import asyncio
 import logging
+import os
+import sys
+
+# Ensure root directory is in sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from src.core.security import security_manager
 from src.core.gemini import gemini_service
 from src.ingestion.deduplicator import JobDeduplicator
