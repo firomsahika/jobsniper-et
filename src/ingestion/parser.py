@@ -30,8 +30,22 @@ class IngestionPipeline:
         posted_at: Optional[datetime] = None
     ) -> Optional[Job]:
         """Runs a raw channel post through deduplication, parsing, embedding, storage, and matching."""
-        if not raw_text or len(raw_text.strip()) < 40:
+        if not raw_text or len(raw_text.strip()) < 60:
             logger.info("Skipping post: text too short to be a valid job vacancy.")
+            return None
+
+        # 0. Filter out generic multi-job promo/digest posts (not an actual vacancy)
+        lower_raw = raw_text.lower()
+        promo_phrases = [
+            "is hiring for various positions",
+            "click through their latest postings",
+            "explore the opportunities: click here",
+            "explore the opportunities",
+            "new health care jobs in ethiopia",
+            "click here to apply: 👉 link",
+        ]
+        if any(p in lower_raw for p in promo_phrases) and len(raw_text.strip()) < 350:
+            logger.info(f"Skipping promotional/digest post from {source_channel} (msg {message_id}).")
             return None
 
         # 1. Exact Duplicate Hash Check
@@ -52,6 +66,12 @@ class IngestionPipeline:
 
         # 4. Structured Entity Extraction via Gemini
         structured = await gemini_service.parse_job_post(raw_text, source_channel)
+
+        # Reject unparseable generic posts that have neither a concrete title nor required skills
+        parsed_title = (structured.get("title") or "").strip()
+        if parsed_title in {"Professional Opportunity", "General Opportunity", ""} and not structured.get("required_skills"):
+            logger.info(f"Skipping generic post from {source_channel} (msg {message_id}) with no concrete role or skills.")
+            return None
 
         # 5. Persist Job
         job = await self.job_repo.create_job(

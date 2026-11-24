@@ -77,14 +77,18 @@ async def handle_language_choice(callback: CallbackQuery, state: FSMContext, i18
 
     has_profile = bool(candidate and candidate.structured_profile)
 
-    await callback.answer(f"Language updated!")
+    await callback.answer(i18n.get("lang_updated_ack", lang=selected_lang))
 
     if has_profile:
         lang_names = {"en": "English", "am": "አማርኛ", "om": "Afaan Oromoo"}
-        confirm_text = f"✅ <b>Language switched to {lang_names.get(selected_lang, selected_lang)}!</b>\n\nYour preferences and notifications will now appear in your selected language."
+        confirm_text = i18n.get(
+            "lang_switched_confirm",
+            lang=selected_lang,
+            lang_name=lang_names.get(selected_lang, selected_lang)
+        )
         await callback.message.edit_text(confirm_text, parse_mode="HTML")
         await callback.message.answer(
-            "📋 <b>Main Menu</b>\n\nSelect an option below to continue:",
+            i18n.get("main_menu_prompt", lang=selected_lang),
             reply_markup=get_main_menu_reply_kb(lang=selected_lang),
             parse_mode="HTML"
         )

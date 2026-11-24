@@ -253,33 +253,55 @@ Post Content:
                 "gap_advisory": f"Role is in {job_domain}, which falls outside your {candidate_profile.get('primary_title', 'software engineering')} specialization."
             }
 
-        # Dynamic fallback calculation based on true overlap
+        # Dynamic fallback calculation based on true semantic & skill overlap
         def compute_smart_fallback() -> Dict[str, Any]:
-            cand_skills = [s.lower() for s in candidate_profile.get("skills", [])]
-            job_skills = [s.lower() for s in job_structured.get("required_skills", [])]
-            matched = [s for s in job_skills if any(cs in s or s in cs for cs in cand_skills)]
-            overlap_ratio = len(matched) / max(1, min(len(job_skills), 6)) if job_skills else 0.5
-            skill_pts = int(overlap_ratio * 40)
-            domain_pts = 35 if cand_domain == job_domain else 20
+            from src.core.matching_engine import RoleDomain
 
-            t_cand = candidate_profile.get("primary_title", "").lower()
-            t_job = job_structured.get("title", "").lower()
-            title_pts = 15 if any(w in t_job for w in t_cand.split()) else 5
+            raw_low = (job_raw or "").lower()
+            cand_skills = [s.lower().strip() for s in candidate_profile.get("skills", []) if len(s.strip()) >= 2]
+            job_skills = [s.lower().strip() for s in job_structured.get("required_skills", []) if len(s.strip()) >= 2]
+
+            # Match against explicit job_skills OR presence of candidate skills inside raw job text
+            matched = []
+            for cs in cand_skills:
+                if any(cs in js or js in cs for js in job_skills) or re.search(r'(?<!\w)' + re.escape(cs) + r'(?!\w)', raw_low):
+                    matched.append(cs)
+
+            if job_skills:
+                overlap_ratio = len(matched) / max(1, min(len(job_skills), 5))
+            else:
+                overlap_ratio = len(matched) / max(1, min(len(cand_skills), 5)) if matched else 0.0
+
+            skill_pts = int(min(1.0, overlap_ratio) * 40)
+            domain_pts = 35 if (cand_domain == job_domain and cand_domain != RoleDomain.OTHER) else (20 if is_compat and cand_domain != RoleDomain.OTHER else 0)
+
+            generic_words = {"professional", "opportunity", "general", "specialist", "officer", "manager", "engineer", "developer", "senior", "junior", "associate", "assistant", "lead", "and", "of", "in", "the", "&"}
+            t_cand_tokens = [w for w in re.split(r'[\s/\-,]+', candidate_profile.get("primary_title", "").lower()) if w and w not in generic_words and len(w) >= 3]
+            t_job_low = (job_structured.get("title") or "").lower()
+            title_hits = sum(1 for w in t_cand_tokens if w in t_job_low or w in raw_low)
+            title_pts = 15 if title_hits >= 1 and any(w in t_job_low for w in t_cand_tokens) else (8 if title_hits >= 1 else 0)
 
             c_exp = candidate_profile.get("years_of_experience", 0)
             j_exp = job_structured.get("required_experience_years", 0)
             exp_pts = 10 if c_exp >= j_exp else 5
 
             calculated_score = min(int(max_domain_score), domain_pts + skill_pts + title_pts + exp_pts)
+
+            # Semantic Sanity Gate: never allow >= 70% if zero skills AND zero meaningful title tokens matched
+            if not matched and title_hits == 0:
+                calculated_score = min(calculated_score, 30)
+
             strengths = []
             if matched:
                 strengths.append(f"Matching technical competencies: {', '.join(matched[:3])}.")
+            elif title_hits > 0:
+                strengths.append(f"Direct role alignment with {candidate_profile.get('primary_title')}.")
             else:
-                strengths.append(f"Strong foundation in {candidate_profile.get('primary_title', 'modern software engineering')}.")
-            strengths.append(f"Direct experience alignment with {c_exp} years in the domain.")
+                strengths.append(f"Limited direct skill overlap with {job_structured.get('title', 'this posting')}.")
+            strengths.append(f"Experience alignment: {c_exp} years vs {j_exp}+ years required.")
 
-            missing = [s for s in job_skills if s not in matched]
-            gap = f"Prepare to discuss hands-on experience with {missing[0]}." if missing else "Emphasize past system architecture and performance achievements."
+            missing = [s for s in job_skills if not any(cs in s or s in cs for cs in cand_skills)]
+            gap = f"Prepare to discuss hands-on experience with {missing[0]}." if missing else "Emphasize specific portfolio projects and measurable outcomes."
 
             return {
                 "match_score": calculated_score,

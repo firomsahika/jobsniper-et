@@ -59,11 +59,16 @@ def get_main_menu_reply_kb(lang: str = "en") -> ReplyKeyboardMarkup:
 # -----------------------------------------------------------------
 def get_settings_reply_kb(lang: str = "en") -> ReplyKeyboardMarkup:
     """Settings navigation keyboard matching Afriwork's structure."""
-    prof_btn = "Profile" if lang == "en" else ("ፕሮፋይል" if lang == "am" else "Pirofaayilii")
+    labels = {
+        "en": ("Language/ቋንቋ", "Profile", "Terms and Conditions", "Back"),
+        "am": ("Language/ቋንቋ", "ፕሮፋይል", "ውሎች እና ደንቦች", "ተመለስ"),
+        "om": ("Language/ቋንቋ", "Pirofaayilii", "Seeraa fi Dambiiwwan", "Deebi'i"),
+    }
+    lang_btn, prof_btn, terms_btn, back_btn = labels.get(lang, labels["en"])
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="Language/ቋንቋ"), KeyboardButton(text=prof_btn)],
-            [KeyboardButton(text="Terms and Conditions"), KeyboardButton(text="Back")],
+            [KeyboardButton(text=lang_btn), KeyboardButton(text=prof_btn)],
+            [KeyboardButton(text=terms_btn), KeyboardButton(text=back_btn)],
         ],
         resize_keyboard=True,
         is_persistent=True,
@@ -92,11 +97,11 @@ def get_language_inline_kb() -> InlineKeyboardMarkup:
 # 4. Onboarding Choice Keyboard
 # -----------------------------------------------------------------
 def get_onboarding_choice_kb(lang: str = "en") -> InlineKeyboardMarkup:
-    """Prompt for CV file upload vs 4-step wizard."""
+    """Prompt for CV file upload vs 5-step wizard."""
     labels = {
-        "en": ("📎 Upload CV (PDF/Word)", "✍️ Guided 4-Step Builder (No CV)"),
-        "am": ("📎 ሲቪ (CV) ይላኩ (PDF/Word)", "✍️ ያለ ሲቪ በቀላሉ ይመዝገቡ"),
-        "om": ("📎 CV Ergaa (PDF/Word)", "✍️ CV Malee Galmaa'aa"),
+        "en": ("📎 Upload CV (PDF/Word)", "✍️ Guided 5-Step Builder (No CV)"),
+        "am": ("📎 ሲቪ (CV) ይላኩ (PDF/Word)", "✍️ ያለ ሲቪ በቀላሉ ይመዝገቡ (5 ደረጃዎች)"),
+        "om": ("📎 CV Ergaa (PDF/Word)", "✍️ CV Malee Galmaa'aa (Tarkaanfii 5)"),
     }
     cv_label, wiz_label = labels.get(lang, labels["en"])
     return InlineKeyboardMarkup(

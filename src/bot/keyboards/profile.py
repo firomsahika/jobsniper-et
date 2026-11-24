@@ -110,33 +110,38 @@ def get_alert_timing_kb(current_mode: str = "quiet_standard", lang: str = "en") 
     return InlineKeyboardMarkup(inline_keyboard=keyboard_rows)
 
 
-def get_threshold_selection_kb() -> InlineKeyboardMarkup:
+def get_threshold_selection_kb(lang: str = "en") -> InlineKeyboardMarkup:
     """Inline choices for minimum match percentage."""
+    rec_lbl = "80% (Recommended)" if lang == "en" else ("80% (የሚመከር)" if lang == "am" else "80% (Kan Gorfamu)")
+    strict_lbl = "95% (Strict)" if lang == "en" else ("95% (ጥብቅ)" if lang == "am" else "95% (Cimaa)")
+    back_lbl = "⬅️ Back to Profile" if lang == "en" else ("⬅️ ወደ ፕሮፋይል ተመለስ" if lang == "am" else "⬅️ Gara Pirofaayiliitti")
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(text="70%", callback_data="set_thresh:70"),
                 InlineKeyboardButton(text="75%", callback_data="set_thresh:75"),
-                InlineKeyboardButton(text="80% (Recommended)", callback_data="set_thresh:80"),
+                InlineKeyboardButton(text=rec_lbl, callback_data="set_thresh:80"),
             ],
             [
                 InlineKeyboardButton(text="85%", callback_data="set_thresh:85"),
                 InlineKeyboardButton(text="90%", callback_data="set_thresh:90"),
-                InlineKeyboardButton(text="95% (Strict)", callback_data="set_thresh:95"),
+                InlineKeyboardButton(text=strict_lbl, callback_data="set_thresh:95"),
             ],
             [
-                InlineKeyboardButton(text="⬅️ Back to Profile", callback_data="settings:back"),
+                InlineKeyboardButton(text=back_lbl, callback_data="settings:back"),
             ]
         ]
     )
 
 
-def get_delete_confirmation_kb() -> InlineKeyboardMarkup:
+def get_delete_confirmation_kb(lang: str = "en") -> InlineKeyboardMarkup:
+    yes_lbl = "⚠️ YES, Purge Everything" if lang == "en" else ("⚠️ አዎ፣ ሁሉንም አጥፋ" if lang == "am" else "⚠️ EEYYEE, Hunda Haqi")
+    cancel_lbl = "❌ Cancel" if lang == "en" else ("❌ ሰርዝ" if lang == "am" else "❌ Haqi")
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="⚠️ YES, Purge Everything", callback_data="delete:confirm_yes"),
-                InlineKeyboardButton(text="❌ Cancel", callback_data="settings:back"),
+                InlineKeyboardButton(text=yes_lbl, callback_data="delete:confirm_yes"),
+                InlineKeyboardButton(text=cancel_lbl, callback_data="settings:back"),
             ]
         ]
     )

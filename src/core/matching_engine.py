@@ -23,12 +23,18 @@ class RoleDomain:
     MOBILE = "mobile"                   # Android, iOS, Flutter, React Native, Mobile App Developer
     DEVOPS_CLOUD = "devops_cloud"       # DevOps, Cloud, SRE, Infrastructure, Docker, Kubernetes, AWS
     DATA_AI = "data_ai"                 # Data Analyst, Data Scientist, ML Engineer, AI Engineer
+    DESIGN_MEDIA = "design_media"       # Graphics Design, UI/UX, Video Editing, Photoshop, Illustrator, Motion Graphics
     NETWORK_SYSADMIN = "network_it"     # Network Engineer, Network Administrator, Cisco, IT Support, Helpdesk, Hardware
     CIVIL_STRUCTURAL = "civil_eng"      # Civil Engineer, Structural, Site Engineer, Construction, AutoCAD
     MECHANICAL_ELEC = "mech_elec_eng"   # Mechanical Engineer, Electrical Engineer, Hardware
     FINANCE_ACCOUNTING = "finance_acc"  # Accountant, Auditor, Financial Analyst, Cashier, IFRS
+    MANAGEMENT_OPS = "management_ops"   # Business Manager, Operations Manager, Project Manager, General Manager
     HR_ADMIN = "hr_admin"               # HR, Human Resources, Administration, Secretary, Office
     MARKETING_SALES = "sales_marketing" # Marketing, Sales, Digital Marketing, Business Development
+    HEALTHCARE = "healthcare"           # Nurse, Doctor, Pharmacist, Public Health, Clinical, Medical
+    LOGISTICS_SUPPLY = "logistics"      # Logistics, Supply Chain, Procurement, Warehouse, Driver
+    EDUCATION = "education"             # Teacher, Lecturer, Instructor, Tutor
+    NGO_SOCIAL = "ngo_social"           # M&E, Social Work, Program Officer, Grant
     OTHER = "other"
 
 
@@ -37,88 +43,120 @@ def classify_role_domain(title: str, text: str = "", skills: Optional[List[str]]
     combined = f"{title} {text} {' '.join(skills or [])}".lower()
     t_lower = (title or "").lower()
 
-    # 1. Civil & Structural Engineering
+    # Ignore completely generic placeholder titles when checking title
+    is_generic_title = t_lower.strip() in {"professional opportunity", "general opportunity", "professional", "specialist", ""}
+
+    # 1. Design, Graphics & Visual Media
+    if any(k in t_lower for k in ["graphic", "graphics", "visual media", "video editor", "video editing", "ui/ux", "ux/ui", "product designer", "motion", "animator", "illustrator", "photoshop", "creative director", "brand designer"]):
+        return RoleDomain.DESIGN_MEDIA
+
+    # 2. Healthcare & Medical
+    if any(k in t_lower for k in ["nurse", "nursing", "health care", "healthcare", "medical", "doctor", "physician", "pharmacist", "pharmacy", "public health", "clinical", "midwife", "laboratory", "hospital"]):
+        return RoleDomain.HEALTHCARE
+
+    # 3. Civil & Structural Engineering
     if any(k in t_lower for k in ["civil", "structural", "surveyor", "architect", "construction", "site engineer", "draftsman"]):
         return RoleDomain.CIVIL_STRUCTURAL
 
-    # 2. Accounting & Finance
-    if any(k in t_lower for k in ["accountant", "auditor", "finance", "financial", "cashier", "ifrs", "bookkeeper", "accounting"]):
+    # 4. Accounting & Finance
+    if any(k in t_lower for k in ["accountant", "auditor", "finance", "financial", "cashier", "ifrs", "bookkeeper", "accounting", "banker"]):
         return RoleDomain.FINANCE_ACCOUNTING
 
-    # 3. HR & Admin
+    # 5. HR & Admin
     if any(k in t_lower for k in ["human resources", "hr officer", "hr specialist", "recruiter", "administrative", "secretary", "receptionist", "office manager"]):
         return RoleDomain.HR_ADMIN
 
-    # 4. Sales & Marketing
-    if any(k in t_lower for k in ["sales", "marketing", "digital marketing", "business development", "account executive"]):
+    # 6. Sales & Marketing
+    if any(k in t_lower for k in ["sales", "marketing", "digital marketing", "business development", "account executive", "social media"]):
         return RoleDomain.MARKETING_SALES
 
-    # 5. Network Engineering & IT Support / Hardware
+    # 7. Management & Operations
+    if any(k in t_lower for k in ["management", "operations manager", "business manager", "project manager", "general manager", "operations officer", "product manager"]):
+        return RoleDomain.MANAGEMENT_OPS
+
+    # 8. Logistics & Supply Chain
+    if any(k in t_lower for k in ["logistics", "supply chain", "procurement", "purchasing", "warehouse", "fleet"]):
+        return RoleDomain.LOGISTICS_SUPPLY
+
+    # 9. Education
+    if any(k in t_lower for k in ["teacher", "lecturer", "instructor", "tutor", "professor"]):
+        return RoleDomain.EDUCATION
+
+    # 10. NGO & Social Work
+    if any(k in t_lower for k in ["monitoring", "evaluation", "m&e", "social work", "program officer", "grant"]):
+        return RoleDomain.NGO_SOCIAL
+
+    # 11. Network Engineering & IT Support / Hardware
     if any(k in t_lower for k in ["network engineer", "network administrator", "network technician", "cisco", "ccna", "ccnp", "system administrator", "sysadmin", "it support", "helpdesk", "hardware technician", "telecom engineer", "telecommunication"]):
         if not any(sw in t_lower for sw in ["fullstack", "software", "developer", "backend", "frontend"]):
             return RoleDomain.NETWORK_SYSADMIN
 
-    # 6. Mechanical & Electrical
+    # 12. Mechanical & Electrical
     if any(k in t_lower for k in ["mechanical engineer", "electrical engineer", "electromechanical"]):
         return RoleDomain.MECHANICAL_ELEC
 
-    # 7. Mobile Development
+    # 13. Mobile Development
     if any(k in t_lower for k in ["mobile developer", "android developer", "ios developer", "flutter developer", "react native developer"]):
         return RoleDomain.MOBILE
 
-    # 8. Data & AI
+    # 14. Data & AI
     if any(k in t_lower for k in ["data analyst", "data scientist", "data engineer", "machine learning", "ai engineer", "deep learning", "business intelligence"]):
         return RoleDomain.DATA_AI
 
-    # 9. DevOps & Cloud
+    # 15. DevOps & Cloud
     if any(k in t_lower for k in ["devops", "cloud engineer", "sre", "site reliability"]):
         return RoleDomain.DEVOPS_CLOUD
 
-    # 10. Software & Web Engineering (Fullstack, Frontend, Backend)
+    # 16. Software & Web Engineering (Fullstack, Frontend, Backend)
     if any(k in t_lower for k in ["fullstack", "full stack", "software engineer", "developer", "backend", "frontend", "web developer", "python developer", "react developer", "node developer", "java developer", "api developer"]):
         return RoleDomain.SOFTWARE_WEB
 
-    # Fallback inspection of combined text
+    # Fallback inspection of combined text / skills (only if not a generic promo text)
+    if any(k in combined for k in ["graphic design", "graphics design", "adobe illustrator", "photoshop", "video editing", "visual media", "logo design"]):
+        return RoleDomain.DESIGN_MEDIA
+    if any(k in combined for k in ["health care", "healthcare", "nursing", "clinical care", "medical doctor", "pharmacy"]):
+        return RoleDomain.HEALTHCARE
     if any(k in combined for k in ["fullstack", "full stack", "software engineering", "frontend developer", "backend developer", "react.js", "next.js", "django", "fastapi"]):
         return RoleDomain.SOFTWARE_WEB
+    if any(k in combined for k in ["business management", "operations management", "strategic planning"]) and not is_generic_title:
+        return RoleDomain.MANAGEMENT_OPS
 
     return RoleDomain.OTHER
 
 
 def evaluate_domain_compatibility(cand_domain: str, job_domain: str) -> tuple[bool, float, str]:
     """Determines whether candidate and job belong to compatible professional domains."""
+    # Never treat unclassified/generic OTHER jobs as a valid match!
+    if job_domain == RoleDomain.OTHER or cand_domain == RoleDomain.OTHER:
+        return False, 20.0, f"Unclassified or generic domain ({cand_domain} vs {job_domain})."
+
     if cand_domain == job_domain:
         return True, 100.0, "Exact domain match"
 
     # Rules for Software / Web Engineers:
     if cand_domain == RoleDomain.SOFTWARE_WEB:
-        # Related software disciplines
         if job_domain == RoleDomain.MOBILE:
             return True, 88.0, "Mobile engineering aligns with software engineering foundation."
         if job_domain == RoleDomain.DEVOPS_CLOUD:
             return True, 85.0, "DevOps/Cloud aligns with backend/infrastructure software engineering."
         if job_domain == RoleDomain.DATA_AI:
             return True, 82.0, "Data/AI engineering shares strong software engineering competencies."
-        # HARD INCOMPATIBILITY with Network, Civil, Mechanical, Finance, HR, Sales
-        if job_domain in [RoleDomain.NETWORK_SYSADMIN, RoleDomain.CIVIL_STRUCTURAL, RoleDomain.MECHANICAL_ELEC, RoleDomain.FINANCE_ACCOUNTING, RoleDomain.HR_ADMIN, RoleDomain.MARKETING_SALES]:
-            return False, 20.0, f"Domain mismatch: Software engineering profile is not suitable for {job_domain} role."
+        return False, 20.0, f"Domain mismatch: Software engineering profile is not suitable for {job_domain} role."
 
-    # Rules for Network / IT Support:
-    if cand_domain == RoleDomain.NETWORK_SYSADMIN:
-        if job_domain != RoleDomain.NETWORK_SYSADMIN:
-            return False, 20.0, f"Domain mismatch: IT/Network profile is not suitable for {job_domain} role."
+    # Rules for Design / Graphics / Visual Media:
+    if cand_domain == RoleDomain.DESIGN_MEDIA:
+        if job_domain == RoleDomain.MARKETING_SALES:
+            return True, 75.0, "Creative/media design can align with digital marketing roles."
+        return False, 15.0, f"Domain mismatch: Design & Visual Media profile is not suitable for {job_domain} role."
 
-    # Rules for Civil Engineering:
-    if cand_domain == RoleDomain.CIVIL_STRUCTURAL:
-        if job_domain != RoleDomain.CIVIL_STRUCTURAL:
-            return False, 15.0, f"Domain mismatch: Civil engineering profile is not suitable for {job_domain} role."
+    # Rules for Management & Operations:
+    if cand_domain == RoleDomain.MANAGEMENT_OPS:
+        if job_domain in [RoleDomain.HR_ADMIN, RoleDomain.MARKETING_SALES, RoleDomain.NGO_SOCIAL]:
+            return True, 76.0, f"Management background has partial overlap with {job_domain}."
+        return False, 20.0, f"Domain mismatch: Management profile is not suitable for {job_domain} role."
 
-    # Rules for Finance / Accounting:
-    if cand_domain == RoleDomain.FINANCE_ACCOUNTING:
-        if job_domain != RoleDomain.FINANCE_ACCOUNTING:
-            return False, 15.0, f"Domain mismatch: Accounting/Finance profile is not suitable for {job_domain} role."
-
-    return True, 75.0, "General cross-domain evaluation"
+    # Strict single-domain enforcement for specialized fields
+    return False, 15.0, f"Domain mismatch: {cand_domain} profile is not suitable for {job_domain} role."
 
 
 class MatchingEngine:

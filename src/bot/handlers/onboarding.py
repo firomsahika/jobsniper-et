@@ -37,7 +37,7 @@ async def process_cv_document(message: Message, state: FSMContext, lang: str, i1
     file_size = doc.file_size or 0
 
     if file_size > 10 * 1024 * 1024:
-        await message.answer("⚠️ File size exceeds 10MB limit. Please upload a smaller PDF or DOCX file.")
+        await message.answer(i18n.get("cv_too_large", lang=lang))
         return
 
     # Send processing progress message
@@ -102,7 +102,7 @@ async def process_cv_document(message: Message, state: FSMContext, lang: str, i1
     except Exception as e:
         logger.error(f"Error handling CV upload: {e}", exc_info=True)
         await proc_msg.edit_text(
-            "⚠️ An error occurred while parsing your document. Please try again or use the Guided Builder.",
+            i18n.get("cv_parse_failed", lang=lang),
             parse_mode="HTML"
         )
 
@@ -131,7 +131,7 @@ async def handle_text_in_cv_upload(message: Message, state: FSMContext, lang: st
     # If user asks to cancel
     if any(c in text for c in ["cancel", "ሰርዝ", "haqi", "exit", "quit", "back", "ተመለስ"]):
         await state.clear()
-        await message.answer("❌ Action cancelled.", reply_markup=get_main_menu_reply_kb(lang=lang))
+        await message.answer(i18n.get("action_cancelled", lang=lang), reply_markup=get_main_menu_reply_kb(lang=lang))
         return
 
     # Otherwise explain document format and offer 1-tap button to switch to manual builder
@@ -236,7 +236,7 @@ async def wizard_step5_preferences(message: Message, state: FSMContext, lang: st
         f"Work Preferences: {preferences}"
     )
 
-    proc = await message.answer("⏳ <b>Synthesizing your profile...</b>", parse_mode="HTML")
+    proc = await message.answer(i18n.get("synthesizing_profile", lang=lang), parse_mode="HTML")
 
     user_id = message.from_user.id
     name = message.from_user.full_name or message.from_user.first_name or "Applicant"

@@ -82,27 +82,27 @@ class AlertDispatcher:
         exp_years = job_data.get('required_experience_years') or structured_info.get('required_experience_years')
         exp_display = f"{exp_years}+ years" if exp_years else "Open / Fresh Graduate"
 
-        alert_text = (
-            f"🎯 <b>NEW JOB MATCH: {score}% Match Score</b>\n\n"
-            f"💼 <b>Job Title:</b> {job_title}\n"
-            f"🏢 <b>Company:</b> {company_name}\n"
-            f"📌 <b>Job Type:</b> {job_type}\n"
-            f"📍 <b>Location:</b> {location}\n"
-            f"⏳ <b>Experience Required:</b> {exp_display}\n"
-            f"🛠️ <b>Required Skills:</b> <code>{skills_display}</code>\n"
-            f"📅 <b>Application Deadline:</b> {deadline}\n"
-            f"💰 <b>Salary:</b> {salary}\n\n"
-            f"💡 <b>Why You Match:</b>\n{strengths_formatted}\n\n"
-            f"⚠️ <b>Skill Gap Tip:</b>\n{gap_formatted}\n\n"
-            f"📢 <b>Source Channel:</b> <a href=\"{post_url}\">{channel_display}</a>"
+        from src.bot.middlewares.i18n import i18n
+        alert_text = i18n.get(
+            "alert_card_full",
+            lang=lang,
+            score=score,
+            title=job_title,
+            company=company_name,
+            job_type=job_type,
+            location=location,
+            exp_display=exp_display,
+            skills_display=skills_display,
+            deadline=deadline,
+            salary=salary,
+            strengths=strengths_formatted,
+            gap=gap_formatted,
+            post_url=post_url,
+            channel_display=channel_display,
         )
 
         job_id = job_data.get("id")
-        apply_txt = "🚀 Apply on Telegram (View Post)"
-        if lang == "am":
-            apply_txt = "🚀 በቴሌግራም ያመልክቱ (ይመልከቱ)"
-        elif lang == "om":
-            apply_txt = "🚀 Telegram irratti Iyyadhaa"
+        apply_txt = i18n.get("btn_view_original", lang=lang)
 
         kb = InlineKeyboardMarkup(
             inline_keyboard=[
@@ -110,12 +110,12 @@ class AlertDispatcher:
                     InlineKeyboardButton(text=apply_txt, url=post_url),
                 ],
                 [
-                    InlineKeyboardButton(text="📝 Generate Cover Letter", callback_data=f"cvletter:{job_id}"),
-                    InlineKeyboardButton(text="🎙️ Mock Interview", callback_data=f"mockint:{job_id}"),
+                    InlineKeyboardButton(text=i18n.get("btn_generate_cover", lang=lang), callback_data=f"cvletter:{job_id}"),
+                    InlineKeyboardButton(text=i18n.get("btn_mock_interview", lang=lang), callback_data=f"mockint:{job_id}"),
                 ],
                 [
-                    InlineKeyboardButton(text="✅ Applied", callback_data=f"fb_applied:{match_id}"),
-                    InlineKeyboardButton(text="❌ Not Relevant", callback_data=f"fb_notrel:{match_id}"),
+                    InlineKeyboardButton(text=i18n.get("btn_mark_applied", lang=lang), callback_data=f"fb_applied:{match_id}"),
+                    InlineKeyboardButton(text=i18n.get("btn_not_relevant", lang=lang), callback_data=f"fb_notrel:{match_id}"),
                 ]
             ]
         )
@@ -240,17 +240,29 @@ class AlertDispatcher:
                         header = "🌅 <b>Akkam Bultan! Cuunfaa Hojii Har'aa</b>" if is_morning else "🌆 <b>Akkam Ooltan! Cuunfaa Hojii Galgalaa</b>"
 
                     from src.ingestion.web_scraper import get_channel_display_name, build_telegram_post_url
-                    lines = [f"{header}\n\nHere are top opportunities matching your profile:\n"]
+                    intro_line = "Here are top opportunities matching your profile:"
+                    footer_line = "Tap <b>🎯 Job Matches</b> below to view full details and practice mock interviews!"
+                    match_lbl, src_lbl, apply_lbl = "Match", "Source", "👉 Apply on Telegram"
+                    if lang == "am":
+                        intro_line = "ከፕሮፋይልዎ ጋር የሚገጥሙ ዋና የስራ እድሎች:"
+                        footer_line = "ዝርዝሩን ለማየት እና ቃለ-መጠይቅ ለመለማመድ ከታች <b>🎯 የስራ እድሎች</b> የሚለውን ይጫኑ!"
+                        match_lbl, src_lbl, apply_lbl = "ተዛማጅነት", "ምንጭ", "👉 በቴሌግራም ያመልክቱ"
+                    elif lang == "om":
+                        intro_line = "Carraawwan hojii profile keessaniin wal siman:"
+                        footer_line = "Bal'ina isaa ilaaluu fi shaakaluuf gadiitti <b>🎯 Carraa Hojii</b> tuqaa!"
+                        match_lbl, src_lbl, apply_lbl = "Wal Simanna", "Madda", "👉 Telegram irratti Iyyadhaa"
+
+                    lines = [f"{header}\n\n{intro_line}\n"]
                     for i, pm in enumerate(pending_matches, 1):
                         p_url = build_telegram_post_url(pm.job.source_channel, pm.job.source_message_id, pm.job.structured_data)
                         ch_name = get_channel_display_name(pm.job.source_channel)
                         lines.append(
-                            f"<b>{i}. {pm.job.title}</b> at {pm.job.company}\n"
-                            f"🎯 <b>Match:</b> <code>{pm.match_score}%</code> | 📍 {pm.job.location}\n"
-                            f"📢 <b>Source:</b> <a href=\"{p_url}\">{ch_name}</a> | <a href=\"{p_url}\"><b>👉 Apply on Telegram</b></a>\n"
+                            f"<b>{i}. {pm.job.title}</b> - {pm.job.company}\n"
+                            f"🎯 <b>{match_lbl}:</b> <code>{pm.match_score}%</code> | 📍 {pm.job.location}\n"
+                            f"📢 <b>{src_lbl}:</b> <a href=\"{p_url}\">{ch_name}</a> | <a href=\"{p_url}\"><b>{apply_lbl}</b></a>\n"
                         )
 
-                    lines.append("Tap <b>🎯 Job Matches</b> below to view full details and practice mock interviews!")
+                    lines.append(footer_line)
                     digest_text = "\n".join(lines)
 
                     try:
@@ -319,6 +331,9 @@ class AlertDispatcher:
                             continue
 
                     for job in recent_jobs:
+                        if (job.title or "").strip() in {"Professional Opportunity", "General Opportunity", ""}:
+                            continue
+
                         stmt_m = (
                             select(JobMatch)
                             .where(JobMatch.candidate_id == cand.id)

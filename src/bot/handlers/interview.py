@@ -50,7 +50,7 @@ async def prompt_interview_mode(event: [Message, CallbackQuery], lang: str, i18n
             pass
 
     intro_text = i18n.get("interview_intro", lang=lang, title=job_title, company=company)
-    kb = get_interview_mode_kb(job_id=job_id_str)
+    kb = get_interview_mode_kb(job_id=job_id_str, lang=lang)
 
     if isinstance(event, CallbackQuery):
         await event.message.answer(intro_text, reply_markup=kb, parse_mode="HTML")
@@ -87,7 +87,7 @@ async def start_interview_simulation(callback: CallbackQuery, state: FSMContext,
         int_repo = InterviewRepository(session)
         candidate = await cand_repo.get_by_telegram_id(user_id)
         if not candidate:
-            await callback.message.edit_text("Please complete profile setup with /start first.")
+            await callback.message.edit_text(i18n.get("profile_not_found", lang=lang))
             return
 
         # Create session in DB
@@ -109,7 +109,7 @@ async def start_interview_simulation(callback: CallbackQuery, state: FSMContext,
         qa_history=[],
     )
 
-    mode_display = "Text" if mode == "text" else "Voice Notes"
+    mode_display = i18n.get("btn_mode_text" if mode == "text" else "btn_mode_voice", lang=lang)
     start_banner = i18n.get("interview_started", lang=lang, mode_text=mode_display)
     await callback.message.edit_text(start_banner, parse_mode="HTML")
 
@@ -128,14 +128,16 @@ async def ask_current_question(message: Message, state: FSMContext, lang: str, i
     question_content = gemini_service.get_interview_question_prompt(q_num, job_title, company)
     mode_hint = i18n.get("interview_text_hint" if mode == "text" else "interview_voice_hint", lang=lang)
 
-    q_card = (
-        f"🎯 <b>Question {q_num} of 5</b>\n\n"
-        f"{question_content}\n\n"
-        f"{mode_hint}"
+    q_card = i18n.get(
+        "interview_q_header",
+        lang=lang,
+        num=q_num,
+        question=question_content,
+        mode_instruction=mode_hint
     )
 
     await state.update_data(current_question_text=question_content)
-    await message.answer(q_card, reply_markup=get_interview_question_kb(q_num), parse_mode="HTML")
+    await message.answer(q_card, reply_markup=get_interview_question_kb(q_num, lang=lang), parse_mode="HTML")
 
 
 @router.message(InterviewStates.waiting_for_answer, F.voice)
@@ -156,7 +158,7 @@ async def handle_interview_answer(message: Message, state: FSMContext, lang: str
         # Voice note mode
         voice: Voice = message.voice
         if voice.duration > 120:
-            await eval_msg.edit_text("⚠️ Voice note is over 2 minutes. Please keep your response under 120 seconds.")
+            await eval_msg.edit_text(i18n.get("interview_voice_too_long", lang=lang))
             return
 
         voice_io = io.BytesIO()
@@ -200,10 +202,13 @@ async def handle_interview_answer(message: Message, state: FSMContext, lang: str
             logger.error(f"Error saving interview turn: {e}")
 
     # Send instant per-question score card
-    turn_feedback = (
-        f"✅ <b>Feedback for Question {q_num}:</b>\n\n"
-        f"⭐ <b>Score:</b> <code>{score}/10.0</code> | <b>STAR Rating:</b> <i>{star_rating}</i>\n"
-        f"💡 <b>Coach Note:</b> {feedback}"
+    turn_feedback = i18n.get(
+        "interview_turn_feedback",
+        lang=lang,
+        num=q_num,
+        score=score,
+        star_rating=star_rating,
+        feedback=feedback,
     )
     await eval_msg.edit_text(turn_feedback, parse_mode="HTML")
 
@@ -230,7 +235,7 @@ async def skip_interview_question(callback: CallbackQuery, state: FSMContext, la
         "feedback": "Candidate skipped this question.",
     })
 
-    await callback.answer("Skipped question.")
+    await callback.answer(i18n.get("interview_skipped_ack", lang=lang))
     if q_num < 5:
         await state.update_data(current_q=q_num + 1, qa_history=qa_history)
         await ask_current_question(callback.message, state, lang, i18n)
@@ -240,7 +245,7 @@ async def skip_interview_question(callback: CallbackQuery, state: FSMContext, la
 
 @router.callback_query(F.data == "int_end")
 async def end_interview_early(callback: CallbackQuery, state: FSMContext, lang: str, i18n: I18nManager):
-    await callback.answer("Ending interview session.")
+    await callback.answer(i18n.get("interview_ended_ack", lang=lang))
     await finish_interview_session(callback.message, state, lang, i18n)
 
 
