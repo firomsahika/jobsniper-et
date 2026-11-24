@@ -1,0 +1,160 @@
+<!-- ============================================================== -->
+<!-- COMPONENT: Finance, Quotas & Pro Tier (finance.html)            -->
+<!-- ============================================================== -->
+<div class="space-y-6 animate-fade-in">
+  <!-- Page Header -->
+  <div class="flex items-start justify-between">
+    <div class="flex items-start gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 mt-0.5">
+        <i data-lucide="wallet" class="w-5 h-5 text-stone-700"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Finance & Subscription Telemetry</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Free-tier zero-cost quota guard and local Ethiopian payment integrations (Telebirr & Chapa)</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-semibold px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl shadow-sm flex items-center gap-1.5">
+        <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>
+        100% Free Tier ($0 Cost)
+      </span>
+    </div>
+  </div>
+
+  <!-- Free Tier Quota Meters -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div class="bg-white rounded-2xl p-5 border border-gray-200/70 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-bold text-gray-700">Google Gemini Flash</span>
+        <span class="text-xs font-semibold text-emerald-600">14 / 15 RPM</span>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-2 mb-2 overflow-hidden">
+        <div class="bg-emerald-500 h-2 rounded-full" style="width: 25%"></div>
+      </div>
+      <div class="flex justify-between text-[11px] text-gray-400">
+        <span>Current Consumption: Safe</span>
+        <span>$0 / month</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 border border-gray-200/70 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-bold text-gray-700">PostgreSQL Vector Storage</span>
+        <span class="text-xs font-semibold text-blue-600">Local Instance</span>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-2 mb-2 overflow-hidden">
+        <div class="bg-blue-500 h-2 rounded-full" style="width: 15%"></div>
+      </div>
+      <div class="flex justify-between text-[11px] text-gray-400">
+        <span>Storage Used: ~18 MB</span>
+        <span>Unlimited Local</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 border border-gray-200/70 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-bold text-gray-700">Redis 7 In-Memory Cache</span>
+        <span class="text-xs font-semibold text-purple-600">Active Window</span>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-2 mb-2 overflow-hidden">
+        <div class="bg-purple-500 h-2 rounded-full" style="width: 10%"></div>
+      </div>
+      <div class="flex justify-between text-[11px] text-gray-400">
+        <span>Memory Used: ~6 MB</span>
+        <span>Sub-millisecond</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subscription Plan Matrix & Ethiopian Payment Simulator -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Free vs Pro Sniper Comparison -->
+    <div class="bg-white rounded-2xl p-6 border border-gray-200/70 shadow-sm">
+      <h2 class="text-base font-bold text-gray-900 mb-1">Tier Offerings</h2>
+      <p class="text-xs text-gray-400 mb-5">JobSniper ET user subscription levels</p>
+
+      <div class="space-y-4">
+        <!-- Free Tier Card -->
+        <div class="p-4 rounded-xl border border-gray-200 bg-gray-50/60">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-sm font-bold text-gray-900">Community Free Plan</span>
+              <span class="ml-2 text-[10px] uppercase font-bold px-2 py-0.5 bg-gray-200 text-gray-700 rounded-full">Current Default</span>
+            </div>
+            <span class="text-base font-extrabold text-gray-900">0 ETB</span>
+          </div>
+          <ul class="text-xs text-gray-600 space-y-1.5 mt-3">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Up to 3 precision alerts per day</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Full CV AES-256 encryption & parsing</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> 1 STAR mock interview simulation</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> English, Amharic, and Afaan Oromo</li>
+          </ul>
+        </div>
+
+        <!-- Pro Tier Card -->
+        <div class="p-4 rounded-xl border-2 border-stone-900 bg-white shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-sm font-bold text-gray-900">Pro Career Sniper</span>
+              <span class="ml-2 text-[10px] uppercase font-bold px-2 py-0.5 bg-stone-900 text-white rounded-full">Coming Soon</span>
+            </div>
+            <div>
+              <span class="text-base font-extrabold text-gray-900">99 ETB</span>
+              <span class="text-[11px] text-gray-400">/ month</span>
+            </div>
+          </div>
+          <ul class="text-xs text-gray-600 space-y-1.5 mt-3">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-stone-900"></i> <b>Instant push alerts</b> (&lt; 30s from channel post)</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-stone-900"></i> Unlimited tailored 3-paragraph cover letters</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-stone-900"></i> Unlimited <b>Voice Note</b> mock interview simulations</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-stone-900"></i> Direct hiring manager contact auto-reveal</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ethiopian Payment Gateway Integration (Telebirr & Chapa) -->
+    <div class="bg-white rounded-2xl p-6 border border-gray-200/70 shadow-sm flex flex-col justify-between">
+      <div>
+        <h2 class="text-base font-bold text-gray-900 mb-1">Local Ethiopian Gateways</h2>
+        <p class="text-xs text-gray-400 mb-5">Plug-and-play local checkout endpoints</p>
+
+        <div class="space-y-4">
+          <!-- Telebirr Gateway -->
+          <div class="p-4 rounded-xl border border-gray-200 bg-stone-50/50 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-700 font-extrabold text-xs flex items-center justify-center">
+                TB
+              </div>
+              <div>
+                <div class="text-sm font-bold text-gray-900">Telebirr SuperApp Pay</div>
+                <div class="text-xs text-gray-400">USSD Push &amp; In-App QR Code SDK</div>
+              </div>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg">Config Ready</span>
+          </div>
+
+          <!-- Chapa Gateway -->
+          <div class="p-4 rounded-xl border border-gray-200 bg-stone-50/50 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-700 font-extrabold text-xs flex items-center justify-center">
+                CH
+              </div>
+              <div>
+                <div class="text-sm font-bold text-gray-900">Chapa Payments</div>
+                <div class="text-xs text-gray-400">CBE Birr, Awash, BOA, Visa &amp; Mastercard</div>
+              </div>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg">Config Ready</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 pt-5 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+        <span>Payment Currency: <b>ETB (Ethiopian Birr)</b></span>
+        <span>Free Tier Cost: <b>$0.00 / month</b></span>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,53 @@
+<!-- ============================================================== -->
+<!-- COMPONENT: Monitored Ethiopian Channels (channels.html)         -->
+<!-- ============================================================== -->
+<div class="space-y-6 animate-fade-in">
+  <!-- Page Header -->
+  <div class="flex items-start justify-between">
+    <div class="flex items-start gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 mt-0.5">
+        <i data-lucide="radio" class="w-5 h-5 text-stone-700"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Monitored Ethiopian Channels</h1>
+        <p class="text-sm text-gray-500 mt-0.5">31+ curated public Telegram channels streamed 24/7 via Telethon MTProto client</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-semibold px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl shadow-sm flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+        31 Channels Online
+      </span>
+    </div>
+  </div>
+
+  <!-- Filter Category Tabs -->
+  <div class="flex flex-wrap items-center gap-2 select-none">
+    <button onclick="filterChannels('all')" id="ch-tab-all" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition">
+      <span>All Channels</span>
+      <span id="ch-count-all" class="bg-white text-gray-900 font-bold px-1.5 py-0.2 rounded-full text-[10px]">31</span>
+    </button>
+
+    <button onclick="filterChannels('Tech & Development')" id="ch-tab-tech" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
+      <span>Tech & Engineering</span>
+    </button>
+
+    <button onclick="filterChannels('NGO & International')" id="ch-tab-ngo" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
+      <span>NGO & Embassy</span>
+    </button>
+
+    <button onclick="filterChannels('Freelance & Remote')" id="ch-tab-freelance" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
+      <span>Freelance & Remote</span>
+    </button>
+
+    <button onclick="filterChannels('General')" id="ch-tab-general" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
+      <span>General Jobs</span>
+    </button>
+  </div>
+
+  <!-- Channels Grid Container -->
+  <div id="channels-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="col-span-full text-center py-12 text-gray-400">Loading channel registry...</div>
+  </div>
+</div>
+

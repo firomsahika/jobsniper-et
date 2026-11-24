@@ -31,6 +31,7 @@ class MatchRepository:
         match_score: int,
         match_reasoning: List[str],
         skill_gap_tip: Optional[str] = None,
+        is_delivered: bool = False,
     ) -> JobMatch:
         match = JobMatch(
             candidate_id=candidate_id,
@@ -38,11 +39,37 @@ class MatchRepository:
             match_score=match_score,
             match_reasoning=match_reasoning,
             skill_gap_tip=skill_gap_tip,
+            is_delivered=is_delivered,
+            delivered_at=datetime.utcnow() if is_delivered else None,
         )
         self.session.add(match)
         await self.session.commit()
         await self.session.refresh(match)
         return match
+
+    async def mark_delivered(self, match_id: UUID) -> None:
+        stmt = (
+            update(JobMatch)
+            .where(JobMatch.id == match_id)
+            .values(is_delivered=True, delivered_at=datetime.utcnow())
+        )
+        await self.session.execute(stmt)
+        await self.session.commit()
+
+    async def get_undelivered_matches_for_candidate(self, candidate_id: UUID, limit: int = 5) -> List[JobMatch]:
+        from sqlalchemy.orm import selectinload
+        stmt = (
+            select(JobMatch)
+            .options(selectinload(JobMatch.job))
+            .where(
+                JobMatch.candidate_id == candidate_id,
+                JobMatch.is_delivered.is_(False)
+            )
+            .order_by(JobMatch.match_score.desc())
+            .limit(limit)
+        )
+        res = await self.session.execute(stmt)
+        return list(res.scalars().all())
 
     async def update_feedback(self, match_id: UUID, feedback: str) -> None:
         stmt = update(JobMatch).where(JobMatch.id == match_id).values(user_feedback=feedback)

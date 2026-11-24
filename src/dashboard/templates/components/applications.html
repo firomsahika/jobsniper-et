@@ -1,0 +1,47 @@
+<!-- ============================================================== -->
+<!-- COMPONENT: Applications & Ingested Vacancies (applications.html)-->
+<!-- ============================================================== -->
+<div class="space-y-6 animate-fade-in">
+  <!-- Page Header Matching Screenshot -->
+  <div class="flex items-start justify-between">
+    <div class="flex items-start gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 mt-0.5">
+        <i data-lucide="briefcase" class="w-5 h-5 text-stone-700"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">My Applications</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Track your application and interview progress across monitored vacancies</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-semibold px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-gray-600 shadow-sm flex items-center gap-1.5">
+        <i data-lucide="radio" class="w-3.5 h-3.5 text-blue-600"></i>
+        31 Ethiopian Channels Monitored
+      </span>
+    </div>
+  </div>
+
+  <!-- Filter Tabs (Exact Screenshot Match: All, Active, Completed) -->
+  <div class="flex items-center gap-2 select-none">
+    <button onclick="filterCategory('all')" id="tab-all" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition">
+      <span>All</span>
+      <span id="badge-all" class="bg-white text-gray-900 font-bold px-1.5 py-0.2 rounded-full text-[10px]">--</span>
+    </button>
+
+    <button onclick="filterCategory('active')" id="tab-active" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
+      <span>Active</span>
+      <span id="badge-active" class="bg-gray-200 text-gray-600 font-bold px-1.5 py-0.2 rounded-full text-[10px]">--</span>
+    </button>
+
+    <button onclick="filterCategory('completed')" id="tab-completed" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
+      <span>Completed</span>
+      <span id="badge-completed" class="bg-gray-200 text-gray-600 font-bold px-1.5 py-0.2 rounded-full text-[10px]">--</span>
+    </button>
+  </div>
+
+  <!-- Applications Dynamic List (Exact Cards Matching Screenshot) -->
+  <div id="cards-container" class="space-y-4">
+    <div class="text-center py-12 text-gray-400">Loading vacancies...</div>
+  </div>
+</div>
+

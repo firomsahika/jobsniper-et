@@ -1,6 +1,6 @@
 {
   "welcome_title": "🎯 <b>JobSniper ET</b> — AI Job Matcher & Career Coach",
-  "welcome_body": "Welcome, <b>{name}</b>!\n\nI continuously monitor <b>50+ Ethiopian job channels</b> 24/7 (HaHuJobs, Ethiojobs, Freelance Ethiopia, NGO vacancies, and more) to find high-match opportunities tailored to your profile.\n\n✨ <b>What I do for you:</b>\n• <b>Real-time AI Match Alerts:</b> Instant alerts when opportunities hit your 80%+ threshold.\n• <b>Instant Cover Letters:</b> Tailored 3-paragraph drafts mapping your exact skills to the role.\n• <b>AI Mock Interview Coach:</b> 5-question STAR simulation via text or voice notes with instant feedback.",
+  "welcome_body": "Welcome, <b>{name}</b>!\n\nI continuously monitor <b>31+ Ethiopian job channels</b> 24/7 to find high-match opportunities tailored to your profile.\n\n✨ <b>What I do for you:</b>\n• <b>Real-time AI Match Alerts:</b> Instant alerts when opportunities hit your 80%+ threshold.\n• <b>Instant Cover Letters:</b> Tailored 3-paragraph drafts mapping your exact skills to the role.\n• <b>AI Mock Interview Coach:</b> 5-question STAR simulation via text or voice notes with instant feedback.",
   "select_language": "🌐 <b>Please choose your preferred language:</b>",
   "onboarding_prompt": "📄 <b>Set Up Your Career Profile</b>\n\nTo start receiving sniper alerts, please choose how you want to build your profile:",
   "btn_upload_cv": "📎 Upload CV (PDF / Word)",
@@ -11,14 +11,15 @@
   "btn_settings": "⚙️ Match Preferences",
   
   "upload_cv_instructions": "📤 <b>Upload Your Resume / CV</b>\n\nPlease send your CV as a file attachment (<b>PDF</b> or <b>DOCX</b> format, up to 10MB).\n\n🔒 <i>Your CV is encrypted with bank-grade AES-256-GCM. We never share your data.</i>",
-  "cv_processing": "⏳ <b>Analyzing your CV with Gemini AI...</b>\n• Extracting professional experience\n• Identifying core skills & competencies\n• Generating vector embedding profile\n\nPlease wait a few seconds...",
+  "cv_processing": "⏳ <b>Analyzing your CV with AI...</b>\n• Extracting professional experience\n• Identifying core skills & competencies\n• Generating vector embedding profile\n\nPlease wait a few seconds...",
   "cv_success": "✅ <b>Profile Successfully Created!</b>\n\n👤 <b>Name:</b> {name}\n💼 <b>Title:</b> {title}\n🎓 <b>Education:</b> {education}\n⏳ <b>Experience:</b> {experience} years\n🛠️ <b>Top Skills:</b> {skills}\n\n🎯 <i>Your sniper radar is now ACTIVE! You'll receive real-time notifications for roles matching {threshold}% or higher.</i>",
   "cv_error": "⚠️ <b>Could not read document</b>\nPlease ensure you upload a valid PDF or Word (.docx) document containing readable text.",
 
-  "wizard_step1": "🎓 <b>Step 1 of 4: Education & Field of Study</b>\n\nWhat is your highest degree and field of study?\n<i>Example: B.Sc. in Computer Science or BA in Management</i>",
-  "wizard_step2": "💼 <b>Step 2 of 4: Professional Experience</b>\n\nHow many years of experience do you have, and what is your primary job title?\n<i>Example: 2 years as Junior Frontend Developer or Fresh Graduate / Entry Level</i>",
-  "wizard_step3": "🛠️ <b>Step 3 of 4: Core Skills</b>\n\nWhat are your strongest technical or professional skills? (Separate with commas)\n<i>Example: Python, FastAPI, PostgreSQL, Git, Team Leadership</i>",
-  "wizard_step4": "📍 <b>Step 4 of 4: Preferences & Location</b>\n\nWhat work arrangement and location do you prefer?\n<i>Example: Full-time in Addis Ababa, or Remote Tech Roles</i>",
+  "wizard_step1": "💼 <b>Step 1 of 5: Target Job Title / Profession</b>\n\nWhat is your target professional job title or primary profession?\n<i>Example: Business Manager, Operations Officer, Project Manager, Fullstack Developer, Nurse, Accountant, Civil Engineer</i>",
+  "wizard_step2": "🎓 <b>Step 2 of 5: Education & Field of Study</b>\n\nWhat is your highest degree and field of study?\n<i>Example: B.Sc. in Management, B.Sc. in Computer Science, or Diploma in Nursing</i>",
+  "wizard_step3": "⏳ <b>Step 3 of 5: Years of Experience</b>\n\nHow many years of relevant professional experience do you have?\n<i>Example: 3 years or Fresh Graduate / Entry Level</i>",
+  "wizard_step4": "🛠️ <b>Step 4 of 5: Core Skills & Competencies</b>\n\nWhat are your strongest technical or professional skills? (Separate with commas)\n<i>Example: Business Strategy, Operations Management, Financial Analysis, Leadership</i>",
+  "wizard_step5": "📍 <b>Step 5 of 5: Preferences & Location</b>\n\nWhat work arrangement and location do you prefer?\n<i>Example: Full-time in Addis Ababa, Hybrid, or Remote</i>",
   "wizard_completed": "🎉 <b>Profile Created via Guided Builder!</b>\n\nWe've indexed your preferences. You are now ready to receive personalized sniper match alerts!",
 
   "profile_view": "👤 <b>Your Candidate Profile</b>\n\n<b>Name:</b> {name}\n<b>Primary Title:</b> {title}\n<b>Experience:</b> {experience} years\n<b>Key Skills:</b> {skills}\n\n⚙️ <b>Current Alert Preferences:</b>\n• <b>Match Threshold:</b> <code>{threshold}%</code>\n• <b>Quiet Hours:</b> <code>{quiet_start} - {quiet_end} (EAT)</code>\n• <b>Alert Status:</b> {status_badge}",

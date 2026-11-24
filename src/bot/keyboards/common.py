@@ -18,19 +18,19 @@ def get_main_menu_reply_kb(lang: str = "en") -> ReplyKeyboardMarkup:
     labels = {
         "en": (
             "🎯 Job Matches",
-            "👤 Account",
+            "👤 Profile",
             "🎙️ Mock Interview",
             "⚙️ Settings",
         ),
         "am": (
             "🎯 የስራ እድሎች",
-            "👤 የኔ አካውንት",
+            "👤 የኔ ፕሮፋይል",
             "🎙️ ቃለ-መጠይቅ",
             "⚙️ ቅንብሮች",
         ),
         "om": (
             "🎯 Carraa Hojii",
-            "👤 Account Koo",
+            "👤 Pirofaayilii",
             "🎙️ Shaakala",
             "⚙️ Filannoowwan",
         ),
@@ -59,9 +59,10 @@ def get_main_menu_reply_kb(lang: str = "en") -> ReplyKeyboardMarkup:
 # -----------------------------------------------------------------
 def get_settings_reply_kb(lang: str = "en") -> ReplyKeyboardMarkup:
     """Settings navigation keyboard matching Afriwork's structure."""
+    prof_btn = "Profile" if lang == "en" else ("ፕሮፋይል" if lang == "am" else "Pirofaayilii")
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="Language/ቋንቋ"), KeyboardButton(text="Account")],
+            [KeyboardButton(text="Language/ቋንቋ"), KeyboardButton(text=prof_btn)],
             [KeyboardButton(text="Terms and Conditions"), KeyboardButton(text="Back")],
         ],
         resize_keyboard=True,

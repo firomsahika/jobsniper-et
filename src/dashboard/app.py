@@ -209,8 +209,56 @@ async def get_channels_status():
 
 
 # -----------------------------------------------------------------
-# 6. HTML Dashboard UI (Matching the User's Screenshot Design)
+# 6. Mock Interviews Telemetry Endpoint
 # -----------------------------------------------------------------
+@dashboard_app.get("/api/interviews")
+async def get_interviews_list(
+    limit: int = Query(default=20, le=100),
+    session: AsyncSession = Depends(get_db_session),
+):
+    stmt = (
+        select(MockInterview, Candidate)
+        .join(Candidate, MockInterview.candidate_id == Candidate.id)
+        .order_by(desc(MockInterview.created_at))
+        .limit(limit)
+    )
+    res = await session.execute(stmt)
+    rows = res.all()
+
+    return [
+        {
+            "id": str(i.id),
+            "candidate_name": c.full_name,
+            "job_context": i.job_context,
+            "mode": i.mode,
+            "final_score": float(i.final_score) if i.final_score is not None else None,
+            "status": i.status,
+            "transcript": i.transcript,
+            "created_at": i.created_at.isoformat() if i.created_at else None,
+        }
+        for i, c in rows
+    ]
+
+
+# -----------------------------------------------------------------
+# 7. HTML Dashboard UI & Modular Component Loader
+# -----------------------------------------------------------------
+@dashboard_app.get("/components/{component_name}", response_class=HTMLResponse)
+async def get_dashboard_component(component_name: str):
+    """Serves modular component templates for perspective sidebar views."""
+    allowed_components = {"overview", "candidates", "applications", "matches", "interviews", "channels", "finance"}
+    clean_name = component_name.replace(".html", "").lower()
+    if clean_name not in allowed_components:
+        raise HTTPException(status_code=404, detail=f"Component '{clean_name}' not found")
+
+    comp_path = os.path.join(os.path.dirname(__file__), "templates", "components", f"{clean_name}.html")
+    if not os.path.exists(comp_path):
+        raise HTTPException(status_code=404, detail=f"Component template '{clean_name}.html' not found")
+
+    with open(comp_path, "r", encoding="utf-8") as f:
+        return f.read()
+
+
 @dashboard_app.get("/", response_class=HTMLResponse)
 @dashboard_app.get("/dashboard", response_class=HTMLResponse)
 async def serve_dashboard():

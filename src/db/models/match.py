@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import relationship
 from src.db.session import Base
@@ -19,6 +19,8 @@ class JobMatch(Base):
     skill_gap_tip = Column(Text, nullable=True)
     cover_letter_draft = Column(Text, nullable=True)
     user_feedback = Column(String(50), default="pending")  # applied, not_relevant, pending
+    is_delivered = Column(Boolean, default=False)
+    delivered_at = Column(DateTime(timezone=True), nullable=True)
     sent_at = Column(DateTime(timezone=True), default=datetime.utcnow)
 
     __table_args__ = (

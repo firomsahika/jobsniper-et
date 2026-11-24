@@ -1,6 +1,8 @@
 """Candidate Repository for Database Operations."""
 
 import logging
+from datetime import time
+import numpy as np
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 from sqlalchemy import select, delete, update
@@ -84,6 +86,26 @@ class CandidateRepository:
         await self.session.execute(stmt)
         await self.session.commit()
 
+    async def update_notification_mode(
+        self,
+        telegram_id: int,
+        mode: str,
+        start_t: Optional[time] = None,
+        end_t: Optional[time] = None
+    ) -> None:
+        values = {"notification_mode": mode}
+        if start_t is not None:
+            values["quiet_hours_start"] = start_t
+        if end_t is not None:
+            values["quiet_hours_end"] = end_t
+        stmt = (
+            update(Candidate)
+            .where(Candidate.telegram_id == telegram_id)
+            .values(**values)
+        )
+        await self.session.execute(stmt)
+        await self.session.commit()
+
     async def toggle_active(self, telegram_id: int) -> bool:
         candidate = await self.get_by_telegram_id(telegram_id)
         if not candidate:
@@ -104,22 +126,39 @@ class CandidateRepository:
         job_embedding: List[float],
         cosine_threshold: float = 0.70
     ) -> List[Candidate]:
-        """Stage 1: ANN Cosine Similarity query via pgvector.
+        """Stage 1: Cosine Similarity Pre-filtering.
 
-        Filters candidates where cosine similarity (1 - cosine_distance) >= threshold.
+        Calculates cosine similarity between the job embedding and candidate embeddings,
+        returning candidates where similarity >= cosine_threshold.
         """
-        # In pgvector: cosine distance operator is <=>
-        # cosine_similarity = 1 - (cv_embedding <=> job_embedding)
-        # Therefore: (cv_embedding <=> job_embedding) <= (1 - cosine_threshold)
-        max_distance = 1.0 - cosine_threshold
         stmt = (
             select(Candidate)
             .where(Candidate.is_active.is_(True))
             .where(Candidate.cv_embedding.is_not(None))
-            .where(Candidate.cv_embedding.cosine_distance(job_embedding) <= max_distance)
-            .order_by(Candidate.cv_embedding.cosine_distance(job_embedding))
-            .limit(100)
         )
         res = await self.session.execute(stmt)
-        return list(res.scalars().all())
+        candidates = list(res.scalars().all())
+
+        if not candidates or not job_embedding:
+            return []
+
+        job_vec = np.array(job_embedding, dtype=np.float32)
+        job_norm = np.linalg.norm(job_vec)
+        if job_norm == 0:
+            return candidates[:100]
+
+        scored_candidates = []
+        for cand in candidates:
+            if not cand.cv_embedding:
+                continue
+            cand_vec = np.array(cand.cv_embedding, dtype=np.float32)
+            cand_norm = np.linalg.norm(cand_vec)
+            if cand_norm == 0:
+                continue
+            sim = float(np.dot(cand_vec, job_vec) / (cand_norm * job_norm))
+            if sim >= cosine_threshold:
+                scored_candidates.append((sim, cand))
+
+        scored_candidates.sort(key=lambda x: x[0], reverse=True)
+        return [cand for _, cand in scored_candidates[:100]]
 

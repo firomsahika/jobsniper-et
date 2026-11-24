@@ -9,15 +9,18 @@ from src.core.matching_engine import MatchingEngine
 from src.db.models.job import Job
 from src.db.repositories.job_repo import JobRepository
 from src.ingestion.deduplicator import JobDeduplicator
+from src.queue.dispatcher import AlertDispatcher
 
 logger = logging.getLogger(__name__)
 
 
 class IngestionPipeline:
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession, bot=None):
         self.session = session
         self.job_repo = JobRepository(session)
         self.matching_engine = MatchingEngine(session)
+        self.bot = bot
+        self.dispatcher = AlertDispatcher(bot) if bot else None
 
     async def process_incoming_post(
         self,
@@ -69,6 +72,34 @@ class IngestionPipeline:
         # 6. Trigger Stage 1 & Stage 2 Matching Pipeline
         qualified_matches = await self.matching_engine.match_job_against_candidates(job)
         logger.info(f"Job {job.id} matched {len(qualified_matches)} candidate(s).")
+
+        # 7. Dispatch Outbound Alerts (Honoring Notification Mode & Quiet Hours)
+        if self.dispatcher and qualified_matches:
+            structured_info = job.structured_data or {}
+            job_data = {
+                "id": str(job.id),
+                "title": job.title,
+                "company": job.company,
+                "location": job.location,
+                "deadline": job.deadline,
+                "source_channel": job.source_channel,
+                "source_message_id": job.source_message_id,
+                "structured_data": structured_info,
+                "raw_text": job.raw_text,
+                "job_type": structured_info.get("employment_type", "Full-time"),
+                "required_skills": structured_info.get("required_skills", []),
+                "salary_range": structured_info.get("salary_range", "Negotiable"),
+                "required_experience_years": structured_info.get("required_experience_years", 0),
+            }
+            for match_info in qualified_matches:
+                await self.dispatcher.dispatch_job_alert(
+                    candidate=match_info["candidate"],
+                    job_data=job_data,
+                    match_id=str(match_info["match_id"]),
+                    score=match_info["score"],
+                    strengths=match_info.get("strengths", []),
+                    gap_advisory=match_info.get("gap", ""),
+                )
 
         return job
 

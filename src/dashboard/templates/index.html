@@ -18,9 +18,12 @@
       background-color: #f8f9fa;
     }
     .sidebar-active {
-      background-color: #f1f0eb;
-      color: #1a1a1a;
+      background-color: #f1f0eb !important;
+      color: #1a1a1a !important;
       font-weight: 600;
+    }
+    .sidebar-active i {
+      color: #1a1a1a !important;
     }
     .badge-purple {
       background-color: #f5f3ff;
@@ -37,12 +40,24 @@
       color: #2563eb;
       border: 1px solid #bfdbfe;
     }
+    .badge-amber {
+      background-color: #fffbeb;
+      color: #d97706;
+      border: 1px solid #fde68a;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.15s ease-out forwards;
+    }
   </style>
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800">
 
   <!-- ============================================================== -->
-  <!-- LEFT SIDEBAR -->
+  <!-- LEFT SIDEBAR                                                   -->
   <!-- ============================================================== -->
   <aside class="w-64 bg-white border-r border-gray-200/80 flex flex-col justify-between shrink-0 select-none">
     <div>
@@ -62,7 +77,7 @@
         </button>
       </div>
 
-      <!-- Navigation Links -->
+      <!-- Modular Navigation Links -->
       <nav class="p-4 space-y-1">
         <a href="#overview" onclick="switchTab('overview')" id="nav-overview" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100/70 transition">
           <i data-lucide="layout-grid" class="w-4 h-4 text-gray-500"></i>
@@ -76,7 +91,7 @@
 
         <a href="#applications" onclick="switchTab('applications')" id="nav-applications" class="sidebar-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
           <i data-lucide="briefcase" class="w-4 h-4 text-gray-700"></i>
-          <span>Applications & Jobs</span>
+          <span>Applications</span>
         </a>
 
         <a href="#matches" onclick="switchTab('matches')" id="nav-matches" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100/70 transition">
@@ -101,7 +116,7 @@
       </nav>
     </div>
 
-    <!-- User Profile Pill at Bottom of Sidebar -->
+    <!-- User Profile Pill at Bottom of Sidebar (Matching User's Uploaded Screenshot) -->
     <div class="p-4 border-t border-gray-100">
       <div class="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100/80 cursor-pointer transition">
         <div class="flex items-center gap-3">
@@ -119,11 +134,11 @@
   </aside>
 
   <!-- ============================================================== -->
-  <!-- MAIN CONTENT AREA -->
+  <!-- MAIN CONTENT AREA                                              -->
   <!-- ============================================================== -->
   <main class="flex-1 flex flex-col overflow-y-auto">
 
-    <!-- Top Header Bar -->
+    <!-- Top Sticky Header Bar -->
     <header class="h-16 bg-white/70 backdrop-blur-md border-b border-gray-200/70 flex items-center justify-between px-8 shrink-0 sticky top-0 z-10">
       <div class="flex items-center gap-3">
         <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-full flex items-center gap-1.5">
@@ -134,149 +149,191 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <button onclick="refreshData()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition">
+        <button onclick="refreshCurrentView()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition">
           <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span>Live Refresh</span>
         </button>
-        <a href="https://t.me/" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-black hover:bg-gray-800 rounded-lg transition shadow-sm">
+        <a href="https://t.me/JobSniperET_bot" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-black hover:bg-gray-800 rounded-lg transition shadow-sm">
           <i data-lucide="send" class="w-3.5 h-3.5"></i>
           <span>Open Bot</span>
         </a>
       </div>
     </header>
 
+    <!-- Component Mount Container -->
     <div class="p-8 max-w-6xl mx-auto w-full">
-
-      <!-- Page Title & Icon (Matching Screenshot Structure) -->
-      <div class="flex items-start gap-3.5 mb-6">
-        <div class="w-10 h-10 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 mt-0.5">
-          <i data-lucide="briefcase" class="w-5 h-5 text-stone-700"></i>
-        </div>
-        <div>
-          <h1 id="page-title" class="text-2xl font-extrabold text-gray-900 tracking-tight">My Applications</h1>
-          <p id="page-subtitle" class="text-sm text-gray-500 mt-0.5">Track your application and interview progress across monitored vacancies</p>
-        </div>
+      <div id="main-view-container">
+        <!-- Modular component HTML gets dynamically loaded here -->
+        <div class="text-center py-20 text-gray-400">Loading component...</div>
       </div>
-
-      <!-- Quick KPI Stats Bar -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
-        <div class="bg-white rounded-2xl p-4 border border-gray-200/70 shadow-sm">
-          <div class="text-xs text-gray-400 font-medium uppercase tracking-wider">Candidates Joined</div>
-          <div id="stat-candidates" class="text-2xl font-extrabold text-gray-900 mt-1">--</div>
-          <div class="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
-            <i data-lucide="trending-up" class="w-3 h-3"></i> <span id="stat-active-rate">100% active</span>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl p-4 border border-gray-200/70 shadow-sm">
-          <div class="text-xs text-gray-400 font-medium uppercase tracking-wider">Ingested Vacancies</div>
-          <div id="stat-jobs" class="text-2xl font-extrabold text-gray-900 mt-1">--</div>
-          <div class="text-[11px] text-blue-600 font-medium mt-1 flex items-center gap-1">
-            <i data-lucide="radio" class="w-3 h-3"></i> <span>31 Channels Monitored</span>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl p-4 border border-gray-200/70 shadow-sm">
-          <div class="text-xs text-gray-400 font-medium uppercase tracking-wider">AI Sniper Matches</div>
-          <div id="stat-matches" class="text-2xl font-extrabold text-gray-900 mt-1">--</div>
-          <div class="text-[11px] text-purple-600 font-medium mt-1 flex items-center gap-1">
-            <i data-lucide="target" class="w-3 h-3"></i> <span>Two-stage Hybrid Match</span>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl p-4 border border-gray-200/70 shadow-sm">
-          <div class="text-xs text-gray-400 font-medium uppercase tracking-wider">Interview Sessions</div>
-          <div id="stat-interviews" class="text-2xl font-extrabold text-gray-900 mt-1">--</div>
-          <div class="text-[11px] text-amber-600 font-medium mt-1 flex items-center gap-1">
-            <i data-lucide="star" class="w-3 h-3"></i> <span id="stat-avg-score">STAR Framework</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Filter Tabs (Exact Match to Screenshot) -->
-      <div class="flex items-center gap-2 mb-6 select-none">
-        <button onclick="filterCategory('all')" id="tab-all" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition">
-          <span>All</span>
-          <span id="badge-all" class="bg-white text-gray-900 font-bold px-1.5 py-0.2 rounded-full text-[10px]">3</span>
-        </button>
-
-        <button onclick="filterCategory('active')" id="tab-active" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
-          <span>Active</span>
-          <span id="badge-active" class="bg-gray-200 text-gray-600 font-bold px-1.5 py-0.2 rounded-full text-[10px]">1</span>
-        </button>
-
-        <button onclick="filterCategory('completed')" id="tab-completed" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
-          <span>Completed</span>
-          <span id="badge-completed" class="bg-gray-200 text-gray-600 font-bold px-1.5 py-0.2 rounded-full text-[10px]">2</span>
-        </button>
-      </div>
-
-      <!-- Dynamic Cards Container -->
-      <div id="cards-container" class="space-y-4">
-        <!-- Rendered dynamically by JavaScript -->
-        <div class="text-center py-12 text-gray-400">Loading live data...</div>
-      </div>
-
     </div>
   </main>
 
   <!-- ============================================================== -->
-  <!-- JAVASCRIPT LOGIC & API CONNECTIVITY -->
+  <!-- COMPONENT ROUTER & PERSPECTIVE CONTROLLERS                     -->
   <!-- ============================================================== -->
   <script>
+    const componentCache = {};
     let currentTab = 'applications';
-    let currentFilter = 'all';
-    let allData = [];
+    let currentApplicationFilter = 'all';
+    let currentCandidateFilter = 'all';
+    let currentMatchFilter = 'all';
+    let currentInterviewFilter = 'all';
+    let currentChannelFilter = 'all';
 
-    // Initialize Lucide icons
+    // In-memory data stores for active components
+    let applicationsData = [];
+    let candidatesData = [];
+    let matchesData = [];
+    let interviewsData = [];
+    let channelsData = [];
+    let analyticsData = {};
+
     document.addEventListener("DOMContentLoaded", () => {
-      lucide.createIcons();
-      fetchAnalytics();
-      fetchApplications();
+      // Determine initial tab from URL hash or default to 'applications' (matches screenshot)
+      const hash = window.location.hash.replace('#', '');
+      const validTabs = ['overview', 'candidates', 'applications', 'matches', 'interviews', 'channels', 'finance'];
+      const initialTab = validTabs.includes(hash) ? hash : 'applications';
+      
+      switchTab(initialTab);
     });
 
-    async function fetchAnalytics() {
+    // -------------------------------------------------------------
+    // Core Component Switcher
+    // -------------------------------------------------------------
+    async function switchTab(tab) {
+      currentTab = tab;
+      window.location.hash = tab;
+
+      // 1. Update sidebar active state
+      document.querySelectorAll('aside nav a').forEach(a => {
+        a.classList.remove('sidebar-active');
+        a.classList.add('text-gray-600');
+      });
+      const activeLink = document.getElementById(`nav-${tab}`);
+      if (activeLink) {
+        activeLink.classList.add('sidebar-active');
+        activeLink.classList.remove('text-gray-600');
+      }
+
+      // 2. Fetch and render modular component template
+      const container = document.getElementById('main-view-container');
       try {
-        const res = await fetch('/api/analytics');
-        const data = await res.json();
-        
-        document.getElementById('stat-candidates').innerText = data.candidates.total;
-        document.getElementById('stat-jobs').innerText = data.jobs.total;
-        document.getElementById('stat-matches').innerText = data.matches.total;
-        document.getElementById('stat-interviews').innerText = data.interviews.total;
-        
-        if (data.interviews.average_score > 0) {
-          document.getElementById('stat-avg-score').innerText = `Avg Score: ${data.interviews.average_score}/10`;
+        if (!componentCache[tab]) {
+          const res = await fetch(`/components/${tab}.html`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          componentCache[tab] = await res.text();
         }
+
+        container.innerHTML = componentCache[tab];
+        lucide.createIcons();
+
+        // 3. Initialize perspective view data
+        initPerspectiveView(tab);
       } catch (err) {
-        console.warn('Analytics endpoint offline or running in mock mode', err);
+        console.error(`Failed to load component ${tab}:`, err);
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-8 border border-red-200 text-center">
+            <i data-lucide="alert-circle" class="w-8 h-8 text-red-500 mx-auto mb-2"></i>
+            <h3 class="text-base font-bold text-gray-900">Failed to load view</h3>
+            <p class="text-xs text-gray-500 mt-1">${err.message}</p>
+          </div>
+        `;
+        lucide.createIcons();
       }
     }
 
-    async function fetchApplications() {
+    function initPerspectiveView(tab) {
+      if (tab === 'overview') {
+        loadOverviewView();
+      } else if (tab === 'applications') {
+        loadApplicationsView();
+      } else if (tab === 'candidates') {
+        loadCandidatesView();
+      } else if (tab === 'matches') {
+        loadMatchesView();
+      } else if (tab === 'interviews') {
+        loadInterviewsView();
+      } else if (tab === 'channels') {
+        loadChannelsView();
+      } else if (tab === 'finance') {
+        lucide.createIcons();
+      }
+    }
+
+    function refreshCurrentView() {
+      // Bust cache for active tab and reload
+      delete componentCache[currentTab];
+      switchTab(currentTab);
+    }
+
+    // -------------------------------------------------------------
+    // Perspective: 1. Overview Component
+    // -------------------------------------------------------------
+    async function loadOverviewView() {
       try {
-        const res = await fetch('/api/jobs?limit=25');
+        const res = await fetch('/api/analytics');
+        analyticsData = await res.json();
+
+        const candEl = document.getElementById('stat-candidates');
+        const jobsEl = document.getElementById('stat-jobs');
+        const matchEl = document.getElementById('stat-matches');
+        const intEl = document.getElementById('stat-interviews');
+        const scoreEl = document.getElementById('stat-avg-score');
+
+        if (candEl) candEl.innerText = analyticsData.candidates?.total || 0;
+        if (jobsEl) jobsEl.innerText = analyticsData.jobs?.total || 0;
+        if (matchEl) matchEl.innerText = analyticsData.matches?.total || 0;
+        if (intEl) intEl.innerText = analyticsData.interviews?.total || 0;
+        if (scoreEl && analyticsData.interviews?.average_score > 0) {
+          scoreEl.innerText = `Avg Score: ${analyticsData.interviews.average_score}/10`;
+        }
+
+        // Funnel updates
+        const totalJobs = Math.max(1, analyticsData.jobs?.total || 0);
+        const totalMatches = analyticsData.matches?.total || 0;
+        const applied = analyticsData.matches?.applied || 0;
+
+        const s1 = document.getElementById('funnel-stage1');
+        const s2 = document.getElementById('funnel-stage2');
+        const conv = document.getElementById('funnel-conversion');
+        if (s1) s1.innerText = `${Math.min(100, Math.round((totalMatches * 2 / totalJobs) * 100))}% Pre-filtered`;
+        if (s2) s2.innerText = `${totalMatches} Qualified Matches`;
+        if (conv) conv.innerText = `${analyticsData.matches?.conversion_rate || 0}% Conversion`;
+
+        lucide.createIcons();
+      } catch (e) {
+        console.warn('Error loading overview:', e);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Perspective: 2. Applications Component (Matching User Screenshot)
+    // -------------------------------------------------------------
+    async function loadApplicationsView() {
+      try {
+        const res = await fetch('/api/jobs?limit=50');
         const jobs = await res.json();
 
         if (jobs && jobs.length > 0) {
-          allData = jobs.map((j, idx) => ({
+          applicationsData = jobs.map((j, idx) => ({
             id: j.id,
             title: j.title || "Software Engineer",
             company: j.company || "Ethiopian Tech",
             channel: j.source_channel || "@hahujobs",
             statusBadge: idx === 0 ? "Interview under review" : "Qualified for role",
             badgeType: idx === 0 ? "purple" : "green",
-            notice: idx === 0 ? "Interview simulation pending. Review your STAR responses." : "All steps completed. You'll be contacted with next steps.",
+            notice: idx === 0 ? "Interview simulation active. Prepare 5 STAR questions via Telegram bot." : "All steps completed. You'll be contacted with next steps.",
             skills: j.skills || ["Python", "FastAPI", "PostgreSQL"],
             category: idx === 0 ? "active" : "completed",
             experience: j.required_experience || 2,
             deadline: j.deadline || "Open"
           }));
         } else {
-          // Default realistic preview matching user's uploaded screenshot exactly
-          allData = [
+          // Exact realistic fallback matching uploaded screenshot
+          applicationsData = [
             {
-              id: '1',
+              id: 'app-1',
               title: "React and Next.Js Engineer",
               statusBadge: "Interview under review",
               badgeType: "purple",
@@ -289,7 +346,7 @@
               experience: 3
             },
             {
-              id: '2',
+              id: 'app-2',
               title: "Ubuntu/Linux User for AI Data Training",
               statusBadge: "Qualified for role",
               badgeType: "green",
@@ -302,7 +359,7 @@
               experience: 1
             },
             {
-              id: '3',
+              id: 'app-3',
               title: "Full Stack Engineer (Node.js and React)",
               statusBadge: "Qualified for role",
               badgeType: "green",
@@ -317,34 +374,39 @@
           ];
         }
 
-        renderCards();
-      } catch (e) {
-        console.error(e);
+        renderApplications();
+      } catch (err) {
+        console.error(err);
       }
     }
 
-    function renderCards() {
+    function renderApplications() {
       const container = document.getElementById('cards-container');
+      if (!container) return;
       container.innerHTML = '';
 
-      let filtered = allData;
-      if (currentFilter !== 'all') {
-        filtered = allData.filter(item => item.category === currentFilter);
+      let filtered = applicationsData;
+      if (currentApplicationFilter !== 'all') {
+        filtered = applicationsData.filter(item => item.category === currentApplicationFilter);
       }
 
       // Update badge counts
-      const activeCount = allData.filter(d => d.category === 'active').length;
-      const completedCount = allData.filter(d => d.category === 'completed').length;
-      document.getElementById('badge-all').innerText = allData.length;
-      document.getElementById('badge-active').innerText = activeCount;
-      document.getElementById('badge-completed').innerText = completedCount;
+      const activeCount = applicationsData.filter(d => d.category === 'active').length;
+      const completedCount = applicationsData.filter(d => d.category === 'completed').length;
+      const badgeAll = document.getElementById('badge-all');
+      const badgeActive = document.getElementById('badge-active');
+      const badgeCompleted = document.getElementById('badge-completed');
+
+      if (badgeAll) badgeAll.innerText = applicationsData.length;
+      if (badgeActive) badgeActive.innerText = activeCount;
+      if (badgeCompleted) badgeCompleted.innerText = completedCount;
 
       if (filtered.length === 0) {
         container.innerHTML = `
           <div class="bg-white rounded-2xl p-12 text-center border border-gray-200/80">
             <i data-lucide="inbox" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i>
-            <div class="text-sm font-semibold text-gray-700">No applications in this view</div>
-            <div class="text-xs text-gray-400 mt-1">Posts will appear here as channels publish new vacancies.</div>
+            <div class="text-sm font-semibold text-gray-700">No applications in this category</div>
+            <div class="text-xs text-gray-400 mt-1">Vacancies will appear here as channels publish new posts.</div>
           </div>
         `;
         lucide.createIcons();
@@ -417,67 +479,577 @@
 
     function toggleDetails(id) {
       const el = document.getElementById(`details-${id}`);
-      if (el) {
-        el.classList.toggle('hidden');
-      }
+      if (el) el.classList.toggle('hidden');
     }
 
     function filterCategory(category) {
-      currentFilter = category;
-      
+      currentApplicationFilter = category;
       const tabAll = document.getElementById('tab-all');
       const tabActive = document.getElementById('tab-active');
       const tabCompleted = document.getElementById('tab-completed');
 
       [tabAll, tabActive, tabCompleted].forEach(t => {
-        t.className = "px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition";
+        if (t) t.className = "px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition";
       });
 
-      const activeBadge = "px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition";
+      const activeStyle = "px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition";
+      if (category === 'all' && tabAll) tabAll.className = activeStyle;
+      if (category === 'active' && tabActive) tabActive.className = activeStyle;
+      if (category === 'completed' && tabCompleted) tabCompleted.className = activeStyle;
 
-      if (category === 'all') tabAll.className = activeBadge;
-      if (category === 'active') tabActive.className = activeBadge;
-      if (category === 'completed') tabCompleted.className = activeBadge;
-
-      renderCards();
+      renderApplications();
     }
 
-    function switchTab(tab) {
-      currentTab = tab;
-      
-      // Update sidebar highlight
-      document.querySelectorAll('aside nav a').forEach(a => {
-        a.classList.remove('sidebar-active');
-        a.classList.add('text-gray-600');
-      });
+    // -------------------------------------------------------------
+    // Perspective: 3. Candidates / Users Component
+    // -------------------------------------------------------------
+    async function loadCandidatesView() {
+      try {
+        const res = await fetch('/api/candidates');
+        const data = await res.json();
+        
+        candidatesData = (data && data.length > 0) ? data : [
+          {
+            id: 'cand-1',
+            full_name: "Firomsa Hika",
+            telegram_id: 9128522246,
+            ui_language: "en",
+            title: "Senior Full Stack & AI Engineer",
+            experience: 4,
+            skills: ["Python", "FastAPI", "React", "PostgreSQL", "Docker"],
+            min_match_score: 80,
+            is_active: true,
+            has_cv: true,
+            created_at: "2026-11-23"
+          },
+          {
+            id: 'cand-2',
+            full_name: "Alemayehu Tadesse",
+            telegram_id: 847291039,
+            ui_language: "am",
+            title: "Project M&E Specialist",
+            experience: 5,
+            skills: ["Data Analysis", "SPSS", "KoboToolbox", "Report Writing"],
+            min_match_score: 85,
+            is_active: true,
+            has_cv: true,
+            created_at: "2026-11-22"
+          },
+          {
+            id: 'cand-3',
+            full_name: "Chaltu Bekele",
+            telegram_id: 712938491,
+            ui_language: "om",
+            title: "UI/UX Product Designer",
+            experience: 3,
+            skills: ["Figma", "Design Systems", "Prototyping", "User Research"],
+            min_match_score: 75,
+            is_active: false,
+            has_cv: true,
+            created_at: "2026-11-20"
+          }
+        ];
 
-      const activeLink = document.getElementById(`nav-${tab}`);
-      if (activeLink) {
-        activeLink.classList.add('sidebar-active');
-        activeLink.classList.remove('text-gray-600');
+        renderCandidates();
+      } catch (e) {
+        console.error("Error loading candidates:", e);
+      }
+    }
+
+    function renderCandidates(filteredList = null) {
+      const container = document.getElementById('candidates-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let list = filteredList || candidatesData;
+      if (currentCandidateFilter === 'active') list = list.filter(c => c.is_active);
+      if (currentCandidateFilter === 'paused') list = list.filter(c => !c.is_active);
+
+      const countAll = document.getElementById('cand-count-all');
+      const countActive = document.getElementById('cand-count-active');
+      const countPaused = document.getElementById('cand-count-paused');
+      if (countAll) countAll.innerText = candidatesData.length;
+      if (countActive) countActive.innerText = candidatesData.filter(c => c.is_active).length;
+      if (countPaused) countPaused.innerText = candidatesData.filter(c => !c.is_active).length;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-12 text-center border border-gray-200">
+            <i data-lucide="users" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i>
+            <div class="text-sm font-semibold text-gray-700">No candidates found</div>
+            <div class="text-xs text-gray-400 mt-1">Candidates who start @JobSniperET_bot will appear here automatically.</div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
       }
 
-      // Adjust Title
-      const titles = {
-        'overview': ['Control Center & Analytics', 'Real-time telemetry, 2-stage match rates, and system health'],
-        'candidates': ['Registered Candidates', 'Manage users, CV embeddings, and language configurations'],
-        'applications': ['My Applications', 'Track your application and interview progress'],
-        'matches': ['AI Matches & Alerts', 'High-confidence alerts dispatched to Ethiopian job seekers'],
-        'interviews': ['Mock Interview Sessions', 'STAR framework transcripts and candidate readiness evaluations'],
-        'channels': ['Monitored Ethiopian Channels', '31+ verified public channels listening 24/7'],
-        'finance': ['Finance & Subscription Tier', 'Local payment telemetry (Chapa & Telebirr integration)']
-      };
+      list.forEach(c => {
+        const langNames = { en: "English", am: "አማርኛ (Amharic)", om: "Afaan Oromoo" };
+        const langBadges = { en: "badge-blue", am: "badge-green", om: "badge-amber" };
+        const initials = (c.full_name || "User").split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
-      const [title, subtitle] = titles[tab] || titles['applications'];
-      document.getElementById('page-title').innerText = title;
-      document.getElementById('page-subtitle').innerText = subtitle;
+        const card = `
+          <div class="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-full bg-stone-900 text-white font-extrabold text-xs flex items-center justify-center shrink-0">
+                  ${initials}
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-sm font-bold text-gray-900">${c.full_name}</h3>
+                    <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-gray-100 text-gray-600">ID: ${c.telegram_id}</span>
+                    <span class="${langBadges[c.ui_language] || 'badge-blue'} text-[11px] font-medium px-2 py-0.5 rounded-full">
+                      ${langNames[c.ui_language] || c.ui_language}
+                    </span>
+                  </div>
+                  <div class="text-xs text-gray-500 font-medium mt-0.5">
+                    ${c.title} • ${c.experience || 0} yrs experience
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${c.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-500'}">
+                  ${c.is_active ? '● Active' : 'Paused'}
+                </span>
+                <span class="text-xs font-bold text-gray-700 bg-gray-100 px-2 py-1 rounded-lg">
+                  &gt;= ${c.min_match_score || 80}% Fit
+                </span>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3.5 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div class="flex flex-wrap gap-1.5 items-center">
+                <span class="text-gray-400 font-medium mr-1">Skills:</span>
+                ${(c.skills || []).map(s => `<span class="bg-stone-100 text-stone-700 px-2 py-0.5 rounded font-medium text-[11px]">${s}</span>`).join('')}
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] text-gray-400 flex items-center gap-1">
+                  <i data-lucide="lock" class="w-3 h-3 text-emerald-600"></i> Encrypted at Rest
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', card);
+      });
+
+      lucide.createIcons();
     }
 
-    function refreshData() {
-      fetchAnalytics();
-      fetchApplications();
+    function filterCandidates(cat) {
+      currentCandidateFilter = cat;
+      const bAll = document.getElementById('cand-tab-all');
+      const bAct = document.getElementById('cand-tab-active');
+      const bPau = document.getElementById('cand-tab-paused');
+
+      [bAll, bAct, bPau].forEach(b => {
+        if (b) b.className = "px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition";
+      });
+
+      const activeStyle = "px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition";
+      if (cat === 'all' && bAll) bAll.className = activeStyle;
+      if (cat === 'active' && bAct) bAct.className = activeStyle;
+      if (cat === 'paused' && bPau) bPau.className = activeStyle;
+
+      renderCandidates();
+    }
+
+    function searchCandidates(query) {
+      const q = query.toLowerCase().trim();
+      if (!q) {
+        renderCandidates();
+        return;
+      }
+      const filtered = candidatesData.filter(c => 
+        (c.full_name && c.full_name.toLowerCase().includes(q)) ||
+        (c.title && c.title.toLowerCase().includes(q)) ||
+        (c.telegram_id && String(c.telegram_id).includes(q)) ||
+        (c.skills && c.skills.some(s => s.toLowerCase().includes(q)))
+      );
+      renderCandidates(filtered);
+    }
+
+    // -------------------------------------------------------------
+    // Perspective: 4. AI Matches & Alerts Component
+    // -------------------------------------------------------------
+    async function loadMatchesView() {
+      try {
+        const res = await fetch('/api/matches');
+        const data = await res.json();
+
+        matchesData = (data && data.length > 0) ? data : [
+          {
+            match_id: 'm-1',
+            candidate_name: "Firomsa Hika",
+            job_title: "Senior Backend Engineer (Python/FastAPI)",
+            company: "EthioTech Solutions PLC",
+            channel: "@hahujobs",
+            score: 94,
+            reasoning: [
+              "Candidate has 4+ years in Python, FastAPI, and PostgreSQL (Required: 3+).",
+              "Demonstrated experience with Redis caching and Docker containerization.",
+              "Trilingual in English and Amharic for stakeholder communications."
+            ],
+            gap_advisory: "Highlight experience with microservice event streaming during the technical interview.",
+            feedback: "applied",
+            sent_at: "Today, 10:45 AM"
+          },
+          {
+            match_id: 'm-2',
+            candidate_name: "Alemayehu Tadesse",
+            job_title: "Project M&E Officer",
+            company: "International Humanitarian Aid Ethiopia",
+            channel: "@ethiojobs_et",
+            score: 88,
+            reasoning: [
+              "Bachelor degree with 5 years M&E experience in INGO sector.",
+              "Proficient with KoboToolbox and SPSS statistical analysis."
+            ],
+            gap_advisory: "Mention experience with USAID donor compliance reporting.",
+            feedback: "pending",
+            sent_at: "Today, 09:12 AM"
+          }
+        ];
+
+        renderMatches();
+      } catch (e) {
+        console.error("Error loading matches:", e);
+      }
+    }
+
+    function renderMatches() {
+      const container = document.getElementById('matches-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let list = matchesData;
+      if (currentMatchFilter === 'high') list = list.filter(m => m.score >= 85);
+      if (currentMatchFilter === 'applied') list = list.filter(m => m.feedback === 'applied');
+
+      const countAll = document.getElementById('match-count-all');
+      const countHigh = document.getElementById('match-count-high');
+      const countApplied = document.getElementById('match-count-applied');
+      if (countAll) countAll.innerText = matchesData.length;
+      if (countHigh) countHigh.innerText = matchesData.filter(m => m.score >= 85).length;
+      if (countApplied) countApplied.innerText = matchesData.filter(m => m.feedback === 'applied').length;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-12 text-center border border-gray-200">
+            <i data-lucide="crosshair" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i>
+            <div class="text-sm font-semibold text-gray-700">No AI matches in this view</div>
+            <div class="text-xs text-gray-400 mt-1">When the 2-stage hybrid engine matches an ingested vacancy, alerts appear here.</div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      list.forEach(m => {
+        const scoreBadge = m.score >= 90 ? 'bg-purple-100 text-purple-800' : 'bg-emerald-100 text-emerald-800';
+        const card = `
+          <div class="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-2.5">
+                  <h3 class="text-base font-bold text-gray-900">${m.job_title}</h3>
+                  <span class="${scoreBadge} px-2.5 py-0.5 rounded-full text-xs font-extrabold flex items-center gap-1">
+                    <i data-lucide="target" class="w-3.5 h-3.5"></i> ${m.score}% Match
+                  </span>
+                </div>
+                <div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                  <span>Candidate: <b>${m.candidate_name}</b></span>
+                  <span>•</span>
+                  <span>Employer: <b>${m.company}</b></span>
+                  <span>•</span>
+                  <span class="text-blue-600 font-semibold">${m.channel}</span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${m.feedback === 'applied' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-stone-100 text-stone-600'}">
+                  ${m.feedback === 'applied' ? '✓ Applied' : 'Pending Review'}
+                </span>
+                <button onclick="toggleDetails('match-${m.match_id}')" class="text-xs font-semibold text-gray-600 hover:text-gray-900 flex items-center gap-1 transition p-1">
+                  <span>Reasoning</span>
+                  <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Precision Reasoning Strip -->
+            <div id="details-match-${m.match_id}" class="mt-3.5 pt-3.5 border-t border-gray-100 text-xs text-gray-600 space-y-2">
+              <div>
+                <span class="font-bold text-gray-800 block mb-1">Stage 2 Gemini Precision Constraints:</span>
+                <ul class="list-disc list-inside space-y-1 text-gray-600 pl-1">
+                  ${(m.reasoning || []).map(r => `<li>${r}</li>`).join('')}
+                </ul>
+              </div>
+              ${m.gap_advisory ? `
+                <div class="bg-amber-50 border border-amber-200/60 p-2.5 rounded-xl text-amber-800 flex items-start gap-2 mt-2">
+                  <i data-lucide="lightbulb" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                  <span><b>Strategic Advisory:</b> ${m.gap_advisory}</span>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', card);
+      });
+
+      lucide.createIcons();
+    }
+
+    function filterMatches(f) {
+      currentMatchFilter = f;
+      const bAll = document.getElementById('match-tab-all');
+      const bHigh = document.getElementById('match-tab-high');
+      const bApp = document.getElementById('match-tab-applied');
+
+      [bAll, bHigh, bApp].forEach(b => {
+        if (b) b.className = "px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition";
+      });
+
+      const activeStyle = "px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition";
+      if (f === 'all' && bAll) bAll.className = activeStyle;
+      if (f === 'high' && bHigh) bHigh.className = activeStyle;
+      if (f === 'applied' && bApp) bApp.className = activeStyle;
+
+      renderMatches();
+    }
+
+    // -------------------------------------------------------------
+    // Perspective: 5. Mock Interviews Component
+    // -------------------------------------------------------------
+    async function loadInterviewsView() {
+      try {
+        const res = await fetch('/api/interviews');
+        const data = await res.json();
+
+        interviewsData = (data && data.length > 0) ? data : [
+          {
+            id: 'int-1',
+            candidate_name: "Firomsa Hika",
+            job_context: "Senior Backend Engineer (Python, FastAPI, PostgreSQL)",
+            mode: "text",
+            final_score: 8.8,
+            status: "completed",
+            created_at: "Today, 11:20 AM",
+            transcript: [
+              {
+                q: "1. Tell me about a time you optimized a slow PostgreSQL query in production.",
+                a: "In a previous fintech project, query response time degraded to 1.8s. I analyzed the execution plan via EXPLAIN ANALYZE, added a composite B-Tree index on (user_id, created_at), and implemented a 60-second Redis cache. This dropped latency to 18ms.",
+                score: 9.0,
+                feedback: "Excellent STAR execution with specific quantitative metrics (1.8s to 18ms)."
+              },
+              {
+                q: "2. How do you handle transient failure or rate limiting in external APIs?",
+                a: "I utilize exponential backoff with jitter and Redis-backed sliding window rate limiters to avoid cascading 429 errors.",
+                score: 8.6,
+                feedback: "Good technical answer covering retry jitter and token bucket/sliding window concepts."
+              }
+            ]
+          },
+          {
+            id: 'int-2',
+            candidate_name: "Alemayehu Tadesse",
+            job_context: "Project M&E Specialist (INGO Humanitarian Relief)",
+            mode: "voice",
+            final_score: 8.2,
+            status: "completed",
+            created_at: "Yesterday",
+            transcript: [
+              {
+                q: "1. Describe a situation where field data collection was delayed and how you handled it.",
+                a: "During seasonal rains, network in Hawassa was disrupted. I deployed offline KoboCollect forms on field tablets and synced batches when connectivity was restored.",
+                score: 8.2,
+                feedback: "Realistic operational problem-solving demonstrated."
+              }
+            ]
+          }
+        ];
+
+        renderInterviews();
+      } catch (e) {
+        console.error("Error loading interviews:", e);
+      }
+    }
+
+    function renderInterviews() {
+      const container = document.getElementById('interviews-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let list = interviewsData;
+      if (currentInterviewFilter === 'completed') list = list.filter(i => i.status === 'completed');
+      if (currentInterviewFilter === 'in_progress') list = list.filter(i => i.status === 'in_progress');
+
+      const countAll = document.getElementById('int-count-all');
+      const countComp = document.getElementById('int-count-completed');
+      const countProg = document.getElementById('int-count-progress');
+      if (countAll) countAll.innerText = interviewsData.length;
+      if (countComp) countComp.innerText = interviewsData.filter(i => i.status === 'completed').length;
+      if (countProg) countProg.innerText = interviewsData.filter(i => i.status === 'in_progress').length;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-12 text-center border border-gray-200">
+            <i data-lucide="mic" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i>
+            <div class="text-sm font-semibold text-gray-700">No mock interview sessions yet</div>
+            <div class="text-xs text-gray-400 mt-1">Users can start a 5-question STAR interview anytime via Telegram bot.</div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      list.forEach(i => {
+        const card = `
+          <div class="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-2.5">
+                  <h3 class="text-base font-bold text-gray-900">${i.candidate_name}</h3>
+                  <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
+                    <i data-lucide="star" class="w-3.5 h-3.5 text-amber-600"></i> ${i.final_score ? `${i.final_score} / 10` : 'Pending'}
+                  </span>
+                  <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 flex items-center gap-1">
+                    <i data-lucide="${i.mode === 'voice' ? 'mic' : 'message-square'}" class="w-3 h-3"></i>
+                    ${i.mode === 'voice' ? 'Voice Note' : 'Text Mode'}
+                  </span>
+                </div>
+                <div class="text-xs text-gray-500 mt-1">Target Context: <b>${i.job_context}</b></div>
+              </div>
+
+              <button onclick="toggleDetails('int-${i.id}')" class="text-xs font-semibold text-gray-600 hover:text-gray-900 flex items-center gap-1 transition p-1">
+                <span>STAR Transcript</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <!-- Expandable Transcript -->
+            <div id="details-int-${i.id}" class="hidden mt-4 pt-4 border-t border-gray-100 space-y-3">
+              ${(i.transcript || []).map(t => `
+                <div class="p-3 rounded-xl bg-gray-50 border border-gray-200/60 text-xs space-y-1.5">
+                  <div class="font-bold text-gray-900 flex justify-between">
+                    <span>${t.q || t.question}</span>
+                    <span class="text-amber-700 font-bold">${t.score ? `${t.score}/10` : ''}</span>
+                  </div>
+                  <div class="text-gray-700 pl-2 border-l-2 border-stone-400 italic">"${t.a || t.answer}"</div>
+                  <div class="text-emerald-700 font-medium text-[11px] bg-emerald-50 p-2 rounded-lg">
+                    💡 <b>Coach:</b> ${t.feedback}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', card);
+      });
+
+      lucide.createIcons();
+    }
+
+    function filterInterviews(f) {
+      currentInterviewFilter = f;
+      const bAll = document.getElementById('int-tab-all');
+      const bComp = document.getElementById('int-tab-completed');
+      const bProg = document.getElementById('int-tab-progress');
+
+      [bAll, bComp, bProg].forEach(b => {
+        if (b) b.className = "px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition";
+      });
+
+      const activeStyle = "px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition";
+      if (f === 'all' && bAll) bAll.className = activeStyle;
+      if (f === 'completed' && bComp) bComp.className = activeStyle;
+      if (f === 'in_progress' && bProg) bProg.className = activeStyle;
+
+      renderInterviews();
+    }
+
+    // -------------------------------------------------------------
+    // Perspective: 6. Monitored Channels Component
+    // -------------------------------------------------------------
+    async function loadChannelsView() {
+      try {
+        const res = await fetch('/api/channels');
+        channelsData = await res.json();
+        renderChannels();
+      } catch (e) {
+        console.error("Error loading channels:", e);
+      }
+    }
+
+    function renderChannels() {
+      const container = document.getElementById('channels-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let list = channelsData;
+      if (currentChannelFilter !== 'all') {
+        list = list.filter(ch => ch.category === currentChannelFilter);
+      }
+
+      const countAll = document.getElementById('ch-count-all');
+      if (countAll) countAll.innerText = channelsData.length;
+
+      list.forEach(ch => {
+        const card = `
+          <div class="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold font-mono text-stone-900 bg-stone-100 px-2 py-0.5 rounded-md">
+                  ${ch.handle}
+                </span>
+                <span class="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Active
+                </span>
+              </div>
+              <h4 class="text-sm font-bold text-gray-900 tracking-tight">${ch.name}</h4>
+              <div class="text-[11px] text-gray-400 mt-0.5">${ch.category}</div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+              <span class="text-[11px] text-gray-500">24/7 Stream</span>
+              <a href="https://t.me/${ch.handle.replace('@', '')}" target="_blank" class="text-xs font-bold text-stone-900 hover:text-stone-700 flex items-center gap-1">
+                <span>View</span>
+                <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', card);
+      });
+
+      lucide.createIcons();
+    }
+
+    function filterChannels(cat) {
+      currentChannelFilter = cat;
+      const bAll = document.getElementById('ch-tab-all');
+      const bTech = document.getElementById('ch-tab-tech');
+      const bNgo = document.getElementById('ch-tab-ngo');
+      const bFree = document.getElementById('ch-tab-freelance');
+      const bGen = document.getElementById('ch-tab-general');
+
+      [bAll, bTech, bNgo, bFree, bGen].forEach(b => {
+        if (b) b.className = "px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition";
+      });
+
+      const activeStyle = "px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition";
+      if (cat === 'all' && bAll) bAll.className = activeStyle;
+      if (cat === 'Tech & Development' && bTech) bTech.className = activeStyle;
+      if (cat === 'NGO & International' && bNgo) bNgo.className = activeStyle;
+      if (cat === 'Freelance & Remote' && bFree) bFree.className = activeStyle;
+      if (cat === 'General' && bGen) bGen.className = activeStyle;
+
+      renderChannels();
     }
   </script>
 </body>
 </html>
-

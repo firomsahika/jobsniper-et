@@ -1,0 +1,56 @@
+<!-- ============================================================== -->
+<!-- COMPONENT: Candidate Profiles & Users (candidates.html)         -->
+<!-- ============================================================== -->
+<div class="space-y-6 animate-fade-in">
+  <!-- Page Header -->
+  <div class="flex items-start justify-between">
+    <div class="flex items-start gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 mt-0.5">
+        <i data-lucide="users" class="w-5 h-5 text-stone-700"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Profile & Registered Candidates</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Manage job seekers, CV embeddings, match thresholds, and language preferences</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-semibold px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-gray-600 shadow-sm flex items-center gap-1.5">
+        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+        AES-256-GCM Encrypted
+      </span>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+    <!-- Filter Tabs -->
+    <div class="flex items-center gap-2 select-none">
+      <button onclick="filterCandidates('all')" id="cand-tab-all" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition">
+        <span>All Candidates</span>
+        <span id="cand-count-all" class="bg-white text-gray-900 font-bold px-1.5 py-0.2 rounded-full text-[10px]">--</span>
+      </button>
+
+      <button onclick="filterCandidates('active')" id="cand-tab-active" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
+        <span>Active Alerts</span>
+        <span id="cand-count-active" class="bg-gray-200 text-gray-600 font-bold px-1.5 py-0.2 rounded-full text-[10px]">--</span>
+      </button>
+
+      <button onclick="filterCandidates('paused')" id="cand-tab-paused" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
+        <span>Paused</span>
+        <span id="cand-count-paused" class="bg-gray-200 text-gray-600 font-bold px-1.5 py-0.2 rounded-full text-[10px]">--</span>
+      </button>
+    </div>
+
+    <!-- Search Input -->
+    <div class="relative w-full sm:w-72">
+      <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-2.5"></i>
+      <input type="text" id="candidate-search" oninput="searchCandidates(this.value)" placeholder="Search name, skills, or title..." class="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-3.5 py-1.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400 transition" />
+    </div>
+  </div>
+
+  <!-- Candidates Container -->
+  <div id="candidates-container" class="space-y-3.5">
+    <div class="text-center py-12 text-gray-400">Loading candidate directory...</div>
+  </div>
+</div>
+

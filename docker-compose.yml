@@ -3,7 +3,7 @@ services:
   # Database: PostgreSQL 16 with pgvector extension
   # ==============================================================
   postgres:
-    image: pgvector/pgvector:pg16
+    image: postgres:16-alpine
     container_name: jobsniper-postgres
     restart: unless-stopped
     environment:

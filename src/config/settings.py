@@ -25,7 +25,7 @@ class Settings(BaseSettings):
 
     # Gemini AI
     GEMINI_API_KEY: str = Field(default="")
-    GEMINI_MODEL: str = Field(default="gemini-2.5-flash")
+    GEMINI_MODEL: str = Field(default="gemini-1.5-flash")
     EMBEDDING_MODEL: str = Field(default="text-embedding-004")
 
     # Database (PostgreSQL with pgvector)
@@ -56,7 +56,7 @@ class Settings(BaseSettings):
 
     # Engine Thresholds
     DEFAULT_MIN_MATCH_SCORE: int = Field(default=80)
-    STAGE1_VECTOR_THRESHOLD: float = Field(default=0.70)
+    STAGE1_VECTOR_THRESHOLD: float = Field(default=0.55)
     DEDUPLICATION_SIMILARITY_THRESHOLD: float = Field(default=0.92)
     OUTBOUND_RATE_LIMIT_PER_SEC: int = Field(default=25)
 

@@ -23,18 +23,32 @@ class ChannelListener:
         self.api_hash = settings.TELEGRAM_API_HASH
         self.session_name = settings.TELEGRAM_SESSION_NAME
         self.client: Optional[TelegramClient] = None
+        self.bot = None
         self.monitored_channels = get_monitored_channel_handles()
 
     def is_configured(self) -> bool:
         return bool(self.api_id and self.api_hash)
 
     async def start(self):
-        """Starts the Telethon MTProto client listener."""
+        """Starts the Telethon MTProto client listener and/or HTTP Web Scraper."""
+        if settings.TELEGRAM_BOT_TOKEN and not self.bot:
+            from src.bot.bot import create_bot
+            self.bot = create_bot()
+
+        from src.ingestion.web_scraper import WebChannelScraper
+        scraper = WebChannelScraper(bot=self.bot)
+
         if not self.is_configured():
-            logger.warning(
-                "TELEGRAM_API_ID or TELEGRAM_API_HASH not set. MTProto listener running in idle/simulation mode."
+            logger.info(
+                "ℹ️ TELEGRAM_API_ID / TELEGRAM_API_HASH not set in .env. "
+                "Activating automated HTTP Public Channel Scraper for 31+ Ethiopian channels."
             )
+            # Scrape immediately on startup, then poll continuously
+            await scraper.start_polling(interval_seconds=120)
             return
+
+        # If MTProto credentials are configured, run both MTProto live event listener and periodic scraper
+        asyncio.create_task(scraper.start_polling(interval_seconds=180))
 
         logger.info(f"Connecting Telethon client for session '{self.session_name}'...")
         self.client = TelegramClient(self.session_name, self.api_id, self.api_hash)
@@ -55,7 +69,7 @@ class ChannelListener:
 
                 # Process in database session
                 async with async_session_factory() as session:
-                    pipeline = IngestionPipeline(session)
+                    pipeline = IngestionPipeline(session, bot=self.bot)
                     await pipeline.process_incoming_post(
                         source_channel=f"@{channel_username}",
                         message_id=message_id,

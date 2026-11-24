@@ -3,6 +3,7 @@
 import logging
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.storage.redis import RedisStorage
@@ -16,14 +17,17 @@ logger = logging.getLogger(__name__)
 
 
 def create_bot() -> Bot:
-    """Creates configured Bot instance."""
+    """Creates configured Bot instance with resilient network timeout settings."""
     token = settings.TELEGRAM_BOT_TOKEN
     if not token or token == "your_telegram_bot_token_here":
-        # Safe dummy token for local build/testing if not yet supplied
         token = "123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
-    
+
+    # Generous 60s client timeout for resilient operation on high-latency/slow network connections
+    session = AiohttpSession(timeout=60.0)
+
     return Bot(
         token=token,
+        session=session,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML)
     )
 
@@ -57,16 +61,32 @@ async def create_dispatcher() -> Dispatcher:
 
 
 async def setup_bot_commands(bot: Bot):
-    """Registers slash commands in Telegram client menu."""
+    """Registers bot description, short description, and slash commands in Telegram."""
     commands = [
         BotCommand(command="start", description="Launch JobSniper & configure profile"),
-        BotCommand(command="profile", description="View profile, change match % & quiet hours"),
+        BotCommand(command="profile", description="View profile, match threshold & settings"),
         BotCommand(command="interview", description="Practice 5-question STAR mock interview"),
         BotCommand(command="help", description="How JobSniper works & commands guide"),
         BotCommand(command="delete_data", description="Permanently delete all your personal data"),
     ]
     try:
         await bot.set_my_commands(commands)
+
+        bot_description = (
+            "🎯 Welcome to JobSniper ET — Ethiopia's Premier AI Career Radar & Mock Interview Coach!\n\n"
+            "⚡ Why JobSniper ET?\n"
+            "Finding a job in Ethiopia shouldn't mean scrolling through dozens of Telegram channels every day. JobSniper ET continuously monitors 31+ top Ethiopian channels 24/7 so you never miss an opportunity.\n\n"
+            "🚀 How It Works:\n"
+            "1️⃣ Upload your CV or enter your skills in 4 simple steps.\n"
+            "2️⃣ AI continuously analyzes new vacancies from 31+ channels.\n"
+            "3️⃣ Receive instant alerts only for roles matching 80%+ with your exact qualifications.\n"
+            "4️⃣ Generate 1-tap tailored cover letters.\n"
+            "5️⃣ Practice 5-question STAR mock interviews with instant voice or text feedback.\n\n"
+            "🔒 100% Free & AES-256-GCM Encrypted.\n\n"
+            "Tap 'Start' below to activate your personal job radar!"
+        )
+        await bot.set_my_description(description=bot_description)
+        await bot.set_my_short_description(short_description="AI Job Matcher & STAR Mock Interview Coach for 31+ Ethiopian channels. 100% Free.")
     except Exception as e:
-        logger.warning(f"Could not register Telegram bot commands: {e}")
+        logger.warning(f"Note on Telegram bot descriptions/commands: {e}")
 

@@ -4,7 +4,6 @@ import uuid
 from datetime import time, datetime
 from sqlalchemy import BigInteger, Boolean, Column, DateTime, Integer, String, Text, Time
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from pgvector.sqlalchemy import Vector
 from src.db.session import Base
 
 
@@ -17,8 +16,9 @@ class Candidate(Base):
     ui_language = Column(String(10), default="en")  # en, am, om
     cv_raw_text_encrypted = Column(Text, nullable=True)
     structured_profile = Column(JSONB, default=dict)
-    cv_embedding = Column(Vector(768), nullable=True)
+    cv_embedding = Column(JSONB, nullable=True)  # 768-dim embedding stored as JSON array
     min_match_score = Column(Integer, default=80)
+    notification_mode = Column(String(30), default="quiet_standard")  # instant, quiet_standard, quiet_extended, work_hours, digest_morning, digest_evening
     quiet_hours_start = Column(Time, default=time(22, 0))
     quiet_hours_end = Column(Time, default=time(7, 0))
     is_active = Column(Boolean, default=True)

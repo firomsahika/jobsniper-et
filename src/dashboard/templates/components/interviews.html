@@ -1,0 +1,47 @@
+<!-- ============================================================== -->
+<!-- COMPONENT: STAR Mock Interviews (interviews.html)               -->
+<!-- ============================================================== -->
+<div class="space-y-6 animate-fade-in">
+  <!-- Page Header -->
+  <div class="flex items-start justify-between">
+    <div class="flex items-start gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 mt-0.5">
+        <i data-lucide="mic" class="w-5 h-5 text-stone-700"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">STAR Mock Interview Coach</h1>
+        <p class="text-sm text-gray-500 mt-0.5">5-question behavioral & technical simulations with STAR scoring and live audio/text transcripts</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-semibold px-3 py-1.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-xl shadow-sm flex items-center gap-1.5">
+        <i data-lucide="star" class="w-3.5 h-3.5 text-amber-600"></i>
+        STAR Framework (1-10 Scale)
+      </span>
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="flex items-center gap-2 select-none">
+    <button onclick="filterInterviews('all')" id="int-tab-all" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-900 text-white flex items-center gap-1.5 transition">
+      <span>All Sessions</span>
+      <span id="int-count-all" class="bg-white text-gray-900 font-bold px-1.5 py-0.2 rounded-full text-[10px]">--</span>
+    </button>
+
+    <button onclick="filterInterviews('completed')" id="int-tab-completed" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
+      <span>Completed</span>
+      <span id="int-count-completed" class="bg-gray-200 text-gray-600 font-bold px-1.5 py-0.2 rounded-full text-[10px]">--</span>
+    </button>
+
+    <button onclick="filterInterviews('in_progress')" id="int-tab-progress" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-gray-100 flex items-center gap-1.5 transition">
+      <span>In Progress</span>
+      <span id="int-count-progress" class="bg-gray-200 text-gray-600 font-bold px-1.5 py-0.2 rounded-full text-[10px]">--</span>
+    </button>
+  </div>
+
+  <!-- Interviews Dynamic Container -->
+  <div id="interviews-container" class="space-y-4">
+    <div class="text-center py-12 text-gray-400">Loading interview sessions...</div>
+  </div>
+</div>
+

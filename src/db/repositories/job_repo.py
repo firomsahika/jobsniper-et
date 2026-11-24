@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta, timezone
 import logging
+import numpy as np
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 from sqlalchemy import select
@@ -32,18 +33,37 @@ class JobRepository:
         lookback_hours: int = 48
     ) -> bool:
         """Evaluates whether an identical or near-duplicate job was posted in the last 48 hours."""
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
-        max_distance = 1.0 - threshold
+        if not job_embedding:
+            return False
 
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
         stmt = (
-            select(Job.id)
+            select(Job.job_embedding)
             .where(Job.created_at >= cutoff)
             .where(Job.job_embedding.is_not(None))
-            .where(Job.job_embedding.cosine_distance(job_embedding) <= max_distance)
-            .limit(1)
         )
         res = await self.session.execute(stmt)
-        return res.scalar_one_or_none() is not None
+        recent_embeddings = res.scalars().all()
+        if not recent_embeddings:
+            return False
+
+        job_vec = np.array(job_embedding, dtype=np.float32)
+        job_norm = np.linalg.norm(job_vec)
+        if job_norm == 0:
+            return False
+
+        for emb in recent_embeddings:
+            if not emb:
+                continue
+            emb_vec = np.array(emb, dtype=np.float32)
+            emb_norm = np.linalg.norm(emb_vec)
+            if emb_norm == 0:
+                continue
+            sim = float(np.dot(job_vec, emb_vec) / (job_norm * emb_norm))
+            if sim >= threshold:
+                return True
+
+        return False
 
     async def create_job(
         self,

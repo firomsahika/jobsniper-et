@@ -9,6 +9,7 @@ Handles:
 - Audio transcription (OGG Opus) & STAR mock interview feedback
 """
 
+import asyncio
 import base64
 import json
 import logging
@@ -17,6 +18,7 @@ from typing import Any, Dict, List, Optional
 import httpx
 from src.config.settings import settings
 from src.queue.redis_client import redis_manager
+from src.core.document_parser import document_parser
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +28,7 @@ GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 class GeminiService:
     def __init__(self):
         self.api_key = settings.GEMINI_API_KEY
-        self.chat_model = settings.GEMINI_MODEL or "gemini-2.5-flash"
+        self.chat_model = settings.GEMINI_MODEL or "gemini-1.5-flash"
         self.embedding_model = settings.EMBEDDING_MODEL or "text-embedding-004"
         self._client: Optional[httpx.AsyncClient] = None
 
@@ -101,30 +103,27 @@ class GeminiService:
         return ""
 
     # -------------------------------------------------------------
-    # 2. Structured CV Parsing
+    # 2. Structured CV Parsing (AI + Local Heuristic Fallback)
     # -------------------------------------------------------------
-    async def parse_cv_text(self, cv_text: str) -> Dict[str, Any]:
-        """Extracts structured JSON data from raw CV text."""
-        default_profile = {
-            "full_name": "Applicant",
-            "primary_title": "Professional",
-            "highest_education": "Not Specified",
-            "years_of_experience": 1,
-            "skills": ["Communication", "Problem Solving"],
-            "summary": cv_text[:200] if cv_text else "",
-            "preferred_roles": []
-        }
+    async def parse_cv_text(self, cv_text: str, file_name: str = "", user_full_name: str = "") -> Dict[str, Any]:
+        """Extracts structured JSON data from raw CV text with dual-layer AI and local heuristic parsing."""
+        # 1. Compute robust local heuristic extraction from document text
+        heuristics = document_parser.extract_profile_heuristics(
+            raw_text=cv_text,
+            file_name=file_name,
+            default_name=user_full_name
+        )
 
         if not self.is_configured() or not cv_text.strip():
-            return default_profile
+            return heuristics
 
         prompt = f"""You are a professional recruiting intelligence system. 
 Extract structured information from the following CV/Resume text into strict JSON format with exactly these keys:
 - "full_name": candidate's name (string)
-- "primary_title": current or target professional job title (string, e.g. "Senior Backend Developer" or "Accountant")
-- "highest_education": degree and institution if found (string)
+- "primary_title": current or target professional job title (string, e.g. "Fullstack Software Engineer" or "Senior Backend Developer")
+- "highest_education": clean degree and field of study without introductory sentences (string, e.g. "B.Sc. in Computer Science and Engineering")
 - "years_of_experience": integer estimated total years of relevant work experience (number, 0 if fresh graduate)
-- "skills": list of top 8-15 core technical and soft skills (array of strings)
+- "skills": comprehensive list of all technical, software, language, framework, database, and tool skills mentioned in the resume (array of strings, e.g. 10-25 skills)
 - "summary": concise 2-sentence summary of the candidate's profile (string)
 - "preferred_roles": list of 3-5 roles they are best qualified for (array of strings)
 
@@ -139,34 +138,56 @@ CV Text:
             raw = await self._generate_content([{"text": prompt}], temperature=0.1)
             raw = re.sub(r"^```(?:json)?\s*", "", raw.strip())
             raw = re.sub(r"\s*```$", "", raw)
-            return json.loads(raw)
+            parsed = json.loads(raw)
+
+            # Ensure essential fields are not generic defaults
+            if not parsed.get("full_name") or parsed.get("full_name") in ["Applicant", "None", ""]:
+                parsed["full_name"] = heuristics["full_name"]
+            if not parsed.get("primary_title") or parsed.get("primary_title") in ["Professional", "Applicant", ""]:
+                parsed["primary_title"] = heuristics["primary_title"]
+            elif "full" in parsed.get("primary_title", "").lower() and "stack" in parsed.get("primary_title", "").lower():
+                parsed["primary_title"] = "Fullstack Software Engineer"
+
+            gemini_skills = parsed.get("skills", [])
+            heur_skills = heuristics.get("skills", [])
+            all_skills = list(dict.fromkeys(gemini_skills + heur_skills))
+            parsed["skills"] = all_skills[:25]
+
+            raw_edu = parsed.get("highest_education", "")
+            if not raw_edu or raw_edu in ["Not Specified", "Higher Education"] or any(raw_edu.lower().startswith(b) for b in ['addis', 'ababa', 'university', 'baba']):
+                parsed["highest_education"] = heuristics["highest_education"]
+            else:
+                cleaned_edu = document_parser.clean_education_degree(raw_edu)
+                parsed["highest_education"] = cleaned_edu if cleaned_edu != "Higher Education" else heuristics["highest_education"]
+
+            if parsed.get("years_of_experience", 0) <= 0 and heuristics["years_of_experience"] > 0:
+                parsed["years_of_experience"] = heuristics["years_of_experience"]
+
+            # Merge projects & portfolio links
+            parsed["projects"] = parsed.get("projects") or heuristics.get("projects", [])
+            parsed["portfolio_url"] = parsed.get("portfolio_url") or heuristics.get("portfolio_url", "")
+
+            return parsed
         except Exception as e:
-            logger.error(f"Error parsing CV text via Gemini: {e}")
-            return default_profile
+            logger.error(f"AI API CV parsing error, using high-accuracy heuristic extraction: {e}")
+            return heuristics
 
     # -------------------------------------------------------------
     # 3. Channel Job Listing Parsing
     # -------------------------------------------------------------
     async def parse_job_post(self, raw_post: str, channel_title: str) -> Dict[str, Any]:
-        """Parses a raw Telegram channel post into structured job metadata."""
-        default_job = {
-            "title": "General Opportunity",
-            "company": "Ethiopian Employer",
-            "location": "Addis Ababa / Ethiopia",
-            "deadline": "Open / Not specified",
-            "required_experience_years": 0,
-            "required_skills": [],
-            "salary_range": "Negotiable",
-            "application_contact": channel_title,
-            "employment_type": "Full-time"
-        }
+        """Parses a raw Telegram channel post into structured job metadata using local heuristics with AI assistance."""
+        # 1. Fast, high-accuracy local heuristic extraction
+        heuristics = document_parser.extract_job_heuristics(raw_post, channel_title)
+        if heuristics.get("title") and heuristics.get("title") != "Professional Opportunity":
+            return heuristics
 
         if not self.is_configured() or not raw_post.strip():
-            return default_job
+            return heuristics
 
         prompt = f"""You are an expert recruitment parser for Ethiopian Telegram job channels.
 Parse the following vacancy message into strict JSON with exactly these keys:
-- "title": Job position title (e.g., "Full Stack Developer", "Field Coordinator", "Junior Accountant")
+- "title": Job position title (e.g., "Fullstack Developer", "Senior Software Engineer", "Junior Accountant")
 - "company": Organization or hiring company name (or "Not Specified" if absent)
 - "location": City or region in Ethiopia or "Remote" (string)
 - "deadline": Expiry date or application deadline as stated in the post (string)
@@ -179,18 +200,22 @@ Parse the following vacancy message into strict JSON with exactly these keys:
 Respond ONLY with valid JSON. No markdown code blocks, no other text.
 
 Post Content:
-\"\"\"
-{raw_post[:6000]}
-\"\"\"
+{raw_post[:8000]}
 """
         try:
             raw = await self._generate_content([{"text": prompt}], temperature=0.1)
             raw = re.sub(r"^```(?:json)?\s*", "", raw.strip())
             raw = re.sub(r"\s*```$", "", raw)
-            return json.loads(raw)
+            parsed = json.loads(raw)
+            if not parsed.get("employment_type"):
+                parsed["employment_type"] = heuristics.get("employment_type", "Full-time")
+            ai_skills = parsed.get("required_skills", []) or []
+            heur_skills = heuristics.get("required_skills", []) or []
+            parsed["required_skills"] = list(dict.fromkeys(ai_skills + heur_skills))[:15]
+            return parsed
         except Exception as e:
-            logger.error(f"Error parsing job post via Gemini: {e}")
-            return default_job
+            logger.debug(f"AI post parsing fallback to heuristics: {e}")
+            return heuristics
 
     # -------------------------------------------------------------
     # 4. Stage 2 Precision Matching & Gap Analysis
@@ -202,24 +227,78 @@ Post Content:
         job_raw: str,
     ) -> Dict[str, Any]:
         """Evaluates strict fit: years, skills, domain alignment, and returns score + strengths + gap advisory."""
-        default_eval = {
-            "match_score": 85,
-            "strengths": [
-                f"Candidate's background in {candidate_profile.get('primary_title', 'their field')} matches {job_structured.get('title', 'the role')}.",
-                f"Overlapping skill competencies: {', '.join(candidate_profile.get('skills', [])[:3])}."
-            ],
-            "gap_advisory": "Emphasize specific projects and quantitative achievements relevant to the posting."
-        }
+        from src.core.matching_engine import classify_role_domain, evaluate_domain_compatibility
+
+        # 1. Domain Pre-Check & Classification
+        cand_domain = classify_role_domain(
+            candidate_profile.get("primary_title", ""),
+            candidate_profile.get("summary", ""),
+            candidate_profile.get("skills", [])
+        )
+        job_domain = classify_role_domain(
+            job_structured.get("title", ""),
+            job_raw,
+            job_structured.get("required_skills", [])
+        )
+        is_compat, max_domain_score, reason = evaluate_domain_compatibility(cand_domain, job_domain)
+
+        # Incompatible domain hard rejection
+        if not is_compat:
+            return {
+                "match_score": int(max_domain_score),
+                "strengths": [
+                    f"Candidate has strong background in {cand_domain}.",
+                    f"Target position requires specialization in {job_domain}."
+                ],
+                "gap_advisory": f"Role is in {job_domain}, which falls outside your {candidate_profile.get('primary_title', 'software engineering')} specialization."
+            }
+
+        # Dynamic fallback calculation based on true overlap
+        def compute_smart_fallback() -> Dict[str, Any]:
+            cand_skills = [s.lower() for s in candidate_profile.get("skills", [])]
+            job_skills = [s.lower() for s in job_structured.get("required_skills", [])]
+            matched = [s for s in job_skills if any(cs in s or s in cs for cs in cand_skills)]
+            overlap_ratio = len(matched) / max(1, min(len(job_skills), 6)) if job_skills else 0.5
+            skill_pts = int(overlap_ratio * 40)
+            domain_pts = 35 if cand_domain == job_domain else 20
+
+            t_cand = candidate_profile.get("primary_title", "").lower()
+            t_job = job_structured.get("title", "").lower()
+            title_pts = 15 if any(w in t_job for w in t_cand.split()) else 5
+
+            c_exp = candidate_profile.get("years_of_experience", 0)
+            j_exp = job_structured.get("required_experience_years", 0)
+            exp_pts = 10 if c_exp >= j_exp else 5
+
+            calculated_score = min(int(max_domain_score), domain_pts + skill_pts + title_pts + exp_pts)
+            strengths = []
+            if matched:
+                strengths.append(f"Matching technical competencies: {', '.join(matched[:3])}.")
+            else:
+                strengths.append(f"Strong foundation in {candidate_profile.get('primary_title', 'modern software engineering')}.")
+            strengths.append(f"Direct experience alignment with {c_exp} years in the domain.")
+
+            missing = [s for s in job_skills if s not in matched]
+            gap = f"Prepare to discuss hands-on experience with {missing[0]}." if missing else "Emphasize past system architecture and performance achievements."
+
+            return {
+                "match_score": calculated_score,
+                "strengths": strengths[:2],
+                "gap_advisory": gap
+            }
 
         if not self.is_configured():
-            return default_eval
+            return compute_smart_fallback()
 
-        prompt = f"""You are an elite Tech Lead & Talent Matcher. Evaluate the alignment between the Candidate Profile and the Job Listing.
-Be realistic, analytical, and objective. 
-Assess:
-1. Experience years constraint: Candidate has {candidate_profile.get('years_of_experience', 0)} yrs, Job requires {job_structured.get('required_experience_years', 0)} yrs.
-2. Skill stack overlap.
-3. Industry/Domain match.
+        prompt = f"""You are an elite Chief Technology Officer & Talent Matching Director.
+Evaluate the exact contextual, domain, and technical alignment between this Candidate Profile and Job Listing.
+Be analytical, objective, and realistic.
+
+CRITICAL DOMAIN & CONTEXT MATCHING RULES:
+1. SEMANTIC CONTEXT: If candidate is a Fullstack / Software Engineer and the job is Network Engineering, Telecom, Hardware Technician, Civil Engineering, or Finance, score MUST be below 25%.
+2. ROLE RELEVANCE: If candidate is Fullstack Software Engineer, matching with Backend or Frontend roles IS ALLOWED only if skill overlap is high (>= 75%).
+3. SKILL OVERLAP: Measure overlap between Candidate skills and Job Required skills.
+4. EXPERIENCE: Candidate has {candidate_profile.get('years_of_experience', 0)} yrs, Job requires {job_structured.get('required_experience_years', 0)} yrs.
 
 Provide your evaluation in strict JSON with:
 - "match_score": Integer between 0 and 100 representing true job suitability.
@@ -243,13 +322,17 @@ Respond ONLY with valid JSON.
             raw = await self._generate_content([{"text": prompt}], temperature=0.1)
             raw = re.sub(r"^```(?:json)?\s*", "", raw.strip())
             raw = re.sub(r"\s*```$", "", raw)
-            return json.loads(raw)
+            parsed = json.loads(raw)
+            # Ensure score does not breach max domain compatibility
+            if parsed.get("match_score", 0) > max_domain_score:
+                parsed["match_score"] = int(max_domain_score)
+            return parsed
         except Exception as e:
             logger.error(f"Error evaluating match precision: {e}")
-            return default_eval
+            return compute_smart_fallback()
 
     # -------------------------------------------------------------
-    # 5. Tailored Cover Letter Generator
+    # 5. Tailored Cover Letter Generator (Context- & Project-Aware)
     # -------------------------------------------------------------
     async def generate_cover_letter(
         self,
@@ -257,14 +340,27 @@ Respond ONLY with valid JSON.
         candidate_profile: Dict[str, Any],
         job_data: Dict[str, Any]
     ) -> str:
-        """Generates an executive, highly targeted 3-paragraph cover letter."""
-        fallback = f"""Dear Hiring Team,
+        """Generates an executive, highly targeted 3-paragraph cover letter based on candidate's real projects and experience."""
+        title = job_data.get("title") or "Software Engineer"
+        company = job_data.get("company") or "your organization"
+        cand_title = candidate_profile.get("primary_title") or "Fullstack Software Engineer"
+        cand_skills = candidate_profile.get("skills", [])
+        skills_highlight = ", ".join(cand_skills[:5]) if cand_skills else "modern software engineering and problem-solving"
+        years_exp = candidate_profile.get("years_of_experience", 2)
+        edu = candidate_profile.get("highest_education", "Computer Science & Engineering")
+        cand_projects = candidate_profile.get("projects", [])
+        portfolio_url = candidate_profile.get("portfolio_url", "")
 
-I am writing to express my strong enthusiasm for the {job_data.get('title', 'open')} position at {job_data.get('company', 'your organization')}. With my background as a {candidate_profile.get('primary_title', 'professional')} and hands-on expertise in {', '.join(candidate_profile.get('skills', [])[:4])}, I am confident in delivering immediate value to your team.
+        projects_summary = "\n".join(f"- {p}" for p in cand_projects[:3]) if cand_projects else "Architected scalable full-stack web platforms and microservices with high test coverage."
+        proj_ref = f"delivering projects such as {cand_projects[0]}" if cand_projects else f"architecting high-performance systems with {skills_highlight}"
 
-Throughout my career, I have focused on solving high-impact problems, delivering reliable results, and collaborating cross-functionally. My experience aligns closely with your stated requirements, particularly in executing robust workflows and adapting quickly to evolving priorities.
+        fallback = f"""Dear Hiring Team at {company},
 
-I look forward to discussing how my skills and proactive mindset will support {job_data.get('company', 'your company')}'s mission. Thank you for your time and consideration.
+I am writing to express my strong enthusiasm for the {title} position. With my background as a {cand_title} holding a {edu} and {years_exp}+ years of hands-on experience, I am confident in my ability to contribute meaningfully to {company}'s technical roadmap.
+
+Throughout my experience, I have focused on {proj_ref}, designing scalable architectures, optimizing database throughput, and shipping robust features. My deep expertise in {skills_highlight} directly aligns with the requirements outlined in your {title} vacancy, enabling me to ramp up quickly and deliver immediate business impact.
+
+I would welcome the opportunity to discuss how my qualifications, technical leadership, and proactive mindset can drive measurable success for {company}. Thank you for your time and consideration.
 
 Sincerely,
 {candidate_name}"""
@@ -272,33 +368,52 @@ Sincerely,
         if not self.is_configured():
             return fallback
 
-        prompt = f"""You are a top-tier executive career coach and copywriter.
-Write an exceptional, compelling, 3-paragraph cover letter for the candidate applying to the given job.
+        raw_job_post = job_data.get("raw_text", "")
+        prompt = f"""You are an executive recruiting coach and professional career copywriter.
+Analyze the candidate's actual projects, portfolio, and work history from their resume, along with the vacancy details.
+Write an exceptional, compelling 3-paragraph cover letter specifically tailored to the following candidate and job vacancy.
+
+Candidate Information:
+- Full Name: {candidate_name}
+- Current/Target Role: {cand_title}
+- Education: {edu}
+- Experience: {years_exp} years
+- Core Skills: {', '.join(cand_skills)}
+- Portfolio/GitHub: {portfolio_url or 'Available upon request'}
+- Key Projects & Experience from Resume:
+{projects_summary}
+- Profile Summary: {candidate_profile.get('summary', '')}
+
+Job Vacancy Information:
+- Role Title: {title}
+- Company: {company}
+- Location: {job_data.get('location', 'Addis Ababa')}
+- Required Skills: {json.dumps(job_data.get('required_skills', []))}
+- Stated Deadline: {job_data.get('deadline', 'Open')}
+- Job Post Context:
+\"\"\"
+{raw_job_post[:2500]}
+\"\"\"
 
 Rules:
-1. Exactly 3 crisp paragraphs:
-   - Paragraph 1: Hook, role applied for, and core value proposition.
-   - Paragraph 2: Direct proof of qualifications mapping candidate's specific background ({candidate_profile.get('skills', [])}) to the job requirements.
-   - Paragraph 3: Passion for the organization and clear call-to-action for an interview.
-2. Tone: Confident, professional, modern, authentic. Avoid clichés ("I am a hard worker").
-3. Format as plain ready-to-copy letter. Do not include sender/recipient address header blocks. Start with "Dear Hiring Team," and end with "Sincerely,\n{candidate_name}".
-
-Candidate Name: {candidate_name}
-Candidate Profile:
-{json.dumps(candidate_profile, indent=2)}
-
-Job Details:
-Title: {job_data.get('title')}
-Company: {job_data.get('company')}
-Required Skills: {json.dumps(job_data.get('required_skills', []))}
-Location: {job_data.get('location')}
+1. Exactly 3 impactful paragraphs:
+   - Paragraph 1: Enthusiastic opening directly naming the {title} role at {company}, stating candidate's degree ({edu}) and core engineering strengths.
+   - Paragraph 2: EVIDENCE-DRIVEN & PROJECT-FOCUSED. Directly cite 1-2 specific projects or hands-on accomplishments ({skills_highlight}, {years_exp} yrs exp) from the candidate's background, connecting them directly to the company's stated job requirements.
+   - Paragraph 3: Professional closing conveying enthusiasm for {company} and a polite, confident call to action for an interview.
+2. Tone: Confident, articulate, modern, professional. Absolutely NO generic clichés or lazy template phrasing.
+3. Plain letter format. No header address blocks. Start with "Dear Hiring Team at {company}," and end with "Sincerely,\n{candidate_name}".
 """
-        try:
-            letter = await self._generate_content([{"text": prompt}], temperature=0.3)
-            return letter.strip() or fallback
-        except Exception as e:
-            logger.error(f"Error generating cover letter: {e}")
-            return fallback
+        for attempt in range(2):
+            try:
+                letter = await self._generate_content([{"text": prompt}], temperature=0.25)
+                if letter and len(letter.strip()) > 100:
+                    return letter.strip()
+            except Exception as e:
+                logger.warning(f"Gemini cover letter generation attempt {attempt + 1} error: {e}")
+                if attempt == 0:
+                    await asyncio.sleep(2.0)
+
+        return fallback
 
     # -------------------------------------------------------------
     # 6. STAR Mock Interview Simulation Engine

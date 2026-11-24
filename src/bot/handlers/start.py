@@ -30,11 +30,19 @@ async def handle_start(message: Message, state: FSMContext, lang: str, i18n: I18
         candidate = await repo.get_by_telegram_id(user_id)
 
     if not candidate:
-        # First-time user: Offer language selection
+        # First-time user: Display informative overview and offer language selection
         welcome_txt = (
             f"🎯 <b>Welcome to JobSniper ET!</b>\n"
             f"ሰላም! Baga nagaan dhuftan!\n\n"
-            f"The premier AI-powered Career Sniper & Mock Interview Coach for Ethiopia.\n\n"
+            f"⚡ <b>What is JobSniper ET?</b>\n"
+            f"Your personal AI-powered Career Radar & Mock Interview Coach for the Ethiopian job market.\n\n"
+            f"🎯 <b>Why Use It?</b>\n"
+            f"Never miss a high-match vacancy again! We monitor <b>31+ Ethiopian job channels</b> 24/7 and alert you only when a job matches 80%+ of your exact qualifications.\n\n"
+            f"🚀 <b>How It Works:</b>\n"
+            f"1️⃣ <b>Build Profile:</b> Send your CV or fill your skills manually.\n"
+            f"2️⃣ <b>Sniper Alerts:</b> Instant notifications as soon as a matching vacancy is posted.\n"
+            f"3️⃣ <b>1-Tap Cover Letters:</b> Tailored 3-paragraph drafts ready to send.\n"
+            f"4️⃣ <b>STAR Mock Interviews:</b> Practice with AI via voice notes or text.\n\n"
             f"🌐 <b>Please choose your preferred language / እባክዎ ቋንቋ ይምረጡ:</b>"
         )
         await message.answer(welcome_txt, reply_markup=get_language_inline_kb(), parse_mode="HTML")

@@ -35,9 +35,17 @@ async def run_bot():
 
     try:
         await setup_bot_commands(bot)
+        from src.queue.dispatcher import run_alert_scheduler
+        scheduler_task = asyncio.create_task(run_alert_scheduler(bot))
         logger.info("Starting bot polling loop...")
-        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+        await dp.start_polling(
+            bot,
+            allowed_updates=dp.resolve_used_update_types(),
+            polling_timeout=20,
+        )
     finally:
+        if 'scheduler_task' in locals():
+            scheduler_task.cancel()
         await bot.session.close()
 
 

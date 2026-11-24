@@ -4,7 +4,6 @@ import uuid
 from datetime import datetime
 from sqlalchemy import BigInteger, Column, DateTime, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from pgvector.sqlalchemy import Vector
 from src.db.session import Base
 
 
@@ -20,7 +19,7 @@ class Job(Base):
     location = Column(String(255), default="Ethiopia")
     deadline = Column(String(100), nullable=True)
     structured_data = Column(JSONB, default=dict)
-    job_embedding = Column(Vector(768), nullable=True)
+    job_embedding = Column(JSONB, nullable=True)  # 768-dim embedding stored as JSON array
     raw_text = Column(Text, nullable=False)
     posted_at = Column(DateTime(timezone=True), nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)

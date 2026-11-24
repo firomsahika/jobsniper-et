@@ -39,16 +39,18 @@ async def handle_generate_cover_letter(callback: CallbackQuery, lang: str, i18n:
                 await status_msg.edit_text("⚠️ Could not locate job or candidate profile.")
                 return
 
+            job_context_data = dict(job.structured_data or {})
+            job_context_data["title"] = job.title
+            job_context_data["company"] = job.company
+            job_context_data["location"] = job.location
+            job_context_data["deadline"] = job.deadline
+            job_context_data["raw_text"] = job.raw_text
+
             # Generate high-converting 3-paragraph draft
             cover_letter = await gemini_service.generate_cover_letter(
                 candidate_name=candidate.full_name,
                 candidate_profile=candidate.structured_profile or {},
-                job_data=job.structured_data or {
-                    "title": job.title,
-                    "company": job.company,
-                    "location": job.location,
-                    "required_skills": []
-                }
+                job_data=job_context_data
             )
 
             # Save draft in match table
@@ -60,7 +62,26 @@ async def handle_generate_cover_letter(callback: CallbackQuery, lang: str, i18n:
 
         # Escape html chars inside the code block
         safe_letter = html.escape(cover_letter)
-        ready_text = i18n.get("cover_letter_ready", lang=lang, letter=safe_letter)
+        ready_text = (
+            f"📄 <b>Tailored Cover Letter for {html.escape(job.company)}</b>\n"
+            f"🎯 <b>Role:</b> {html.escape(job.title)}\n\n"
+            f"<code>{safe_letter}</code>\n\n"
+            f"💡 <i>Tap the text above to copy it instantly to your clipboard!</i>"
+        )
+        if lang == "am":
+            ready_text = (
+                f"📄 <b>ለ{html.escape(job.company)} የተዘጋጀ የማመልከቻ ደብዳቤ</b>\n"
+                f"🎯 <b>የስራ መደብ:</b> {html.escape(job.title)}\n\n"
+                f"<code>{safe_letter}</code>\n\n"
+                f"💡 <i>ጽሑፉን በመጫን ኮፒ አድርገው ማመልከት ይችላሉ!</i>"
+            )
+        elif lang == "om":
+            ready_text = (
+                f"📄 <b>Xalayaa Iyyannoo {html.escape(job.company)}f Qophaa'e</b>\n"
+                f"🎯 <b>Hojii:</b> {html.escape(job.title)}\n\n"
+                f"<code>{safe_letter}</code>\n\n"
+                f"💡 <i>Barreeffamicha tuquun koppii godhaa fayyadamaa!</i>"
+            )
 
         await status_msg.edit_text(ready_text, parse_mode="HTML")
 
