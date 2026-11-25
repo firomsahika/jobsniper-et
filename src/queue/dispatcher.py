@@ -31,6 +31,7 @@ class AlertDispatcher:
     def __init__(self, bot: Bot):
         self.bot = bot
         self._delay_between_messages = 1.0 / max(1, settings.OUTBOUND_RATE_LIMIT_PER_SEC)
+        self._evaluated_cache: set = set()
 
     async def dispatch_job_alert(
         self,
@@ -317,12 +318,14 @@ class AlertDispatcher:
                     select(Job)
                     .where(Job.posted_at >= cutoff)
                     .order_by(desc(Job.posted_at))
-                    .limit(40)
+                    .limit(120)
                 )
                 res_j = await session.execute(stmt_j)
                 recent_jobs = list(res_j.scalars().all())
                 if not recent_jobs:
                     return 0
+
+                from src.core.matching_engine import classify_role_domain, evaluate_domain_compatibility
 
                 for cand in candidates:
                     mode = getattr(cand, "notification_mode", "quiet_standard") or "quiet_standard"
@@ -330,8 +333,16 @@ class AlertDispatcher:
                         if is_in_quiet_hours(cand.quiet_hours_start, cand.quiet_hours_end):
                             continue
 
+                    cp = cand.structured_profile or {}
+                    cand_domain = classify_role_domain(cp.get("primary_title", ""), cp.get("summary", ""), cp.get("skills", []))
+                    profile_sig = f"{cp.get('primary_title', '')}:{len(cp.get('skills', []))}"
+
                     for job in recent_jobs:
                         if (job.title or "").strip() in {"Professional Opportunity", "General Opportunity", ""}:
+                            continue
+
+                        cache_key = (str(cand.id), str(job.id), profile_sig)
+                        if cache_key in self._evaluated_cache:
                             continue
 
                         stmt_m = (
@@ -344,6 +355,7 @@ class AlertDispatcher:
 
                         if existing_match:
                             if existing_match.is_delivered:
+                                self._evaluated_cache.add(cache_key)
                                 continue
                             structured_info = job.structured_data or {}
                             job_data = {
@@ -372,12 +384,19 @@ class AlertDispatcher:
                             if sent:
                                 dispatched_count += 1
                         else:
+                            job_domain = classify_role_domain(job.title, job.raw_text, (job.structured_data or {}).get("required_skills", []))
+                            is_compat, _, _ = evaluate_domain_compatibility(cand_domain, job_domain)
+                            if not is_compat:
+                                self._evaluated_cache.add(cache_key)
+                                continue
+
                             # Evaluate match precision with domain & contextual engine
                             precision_result = await gemini_service.evaluate_match_precision(
                                 candidate_profile=cand.structured_profile or {},
                                 job_structured=job.structured_data or {},
                                 job_raw=job.raw_text,
                             )
+                            self._evaluated_cache.add(cache_key)
                             score = precision_result.get("match_score", 0)
                             threshold = cand.min_match_score or settings.DEFAULT_MIN_MATCH_SCORE
 

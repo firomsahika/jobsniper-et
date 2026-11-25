@@ -71,7 +71,7 @@ def classify_role_domain(title: str, text: str = "", skills: Optional[List[str]]
         return RoleDomain.MARKETING_SALES
 
     # 7. Management & Operations
-    if any(k in t_lower for k in ["management", "operations manager", "business manager", "project manager", "general manager", "operations officer", "product manager"]):
+    if any(k in t_lower for k in ["management", "operations manager", "business manager", "project manager", "general manager", "operations officer", "product manager", "branch manager", "administration manager", "area manager", "country manager", "business development manager", "business analyst"]):
         return RoleDomain.MANAGEMENT_OPS
 
     # 8. Logistics & Supply Chain

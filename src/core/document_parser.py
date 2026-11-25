@@ -348,15 +348,15 @@ class DocumentParser:
                 dedup_skills = ["Software Engineering", "Application Development", "Code Quality", "Problem Solving"]
 
         return {
-            "title": title,
-            "company": company,
-            "location": location,
-            "deadline": deadline,
+            "title": (title or "Professional Opportunity")[:250],
+            "company": (company or "Confidential Employer")[:250],
+            "location": (location or "Addis Ababa / Ethiopia")[:250],
+            "deadline": (deadline or "Open / Not specified")[:250],
             "required_experience_years": exp_years,
             "required_skills": dedup_skills[:15],
-            "salary_range": salary,
-            "application_contact": channel_title,
-            "employment_type": job_type
+            "salary_range": (salary or "Negotiable")[:250],
+            "application_contact": (channel_title or "")[:250],
+            "employment_type": job_type[:50]
         }
 
     @staticmethod
