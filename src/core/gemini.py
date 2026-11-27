@@ -253,6 +253,34 @@ Post Content:
                 "gap_advisory": f"Role is in {job_domain}, which falls outside your {candidate_profile.get('primary_title', 'software engineering')} specialization."
             }
 
+        # 2. Experience Constraint Gate (e.g. Fresh Grad 0 yrs vs 3+ / 5+ yrs)
+        c_exp = int(candidate_profile.get("years_of_experience", 0) or 0)
+        j_exp = int(job_structured.get("required_experience_years", 0) or 0)
+        exp_gap = j_exp - c_exp
+        t_job_check = (job_structured.get("title") or "").lower()
+
+        if c_exp == 0 and j_exp >= 3:
+            return {
+                "match_score": 40,
+                "strengths": [
+                    f"Domain alignment with {job_structured.get('title', 'this role')}.",
+                    f"Entry-level education matches the field."
+                ],
+                "gap_advisory": f"Position requires {j_exp}+ years of experience, which exceeds a fresh graduate (0 years) profile."
+            }
+
+        max_exp_score = 100
+        if exp_gap >= 3:
+            max_exp_score = 50
+        elif exp_gap == 2:
+            max_exp_score = 72
+        elif exp_gap == 1 and c_exp == 0:
+            max_exp_score = 84
+        if c_exp == 0 and j_exp >= 2 and any(s in t_job_check for s in ["senior", "manager", "director", "head", "principal", "lead"]):
+            max_exp_score = min(max_exp_score, 55)
+
+        effective_max_score = min(int(max_domain_score), max_exp_score)
+
         # Dynamic fallback calculation based on true semantic & skill overlap
         def compute_smart_fallback() -> Dict[str, Any]:
             from src.core.matching_engine import RoleDomain
@@ -281,11 +309,19 @@ Post Content:
             title_hits = sum(1 for w in t_cand_tokens if w in t_job_low or w in raw_low)
             title_pts = 15 if title_hits >= 1 and any(w in t_job_low for w in t_cand_tokens) else (8 if title_hits >= 1 else 0)
 
-            c_exp = candidate_profile.get("years_of_experience", 0)
-            j_exp = job_structured.get("required_experience_years", 0)
-            exp_pts = 10 if c_exp >= j_exp else 5
+            c_exp_val = int(candidate_profile.get("years_of_experience", 0) or 0)
+            j_exp_val = int(job_structured.get("required_experience_years", 0) or 0)
+            gap_yrs = j_exp_val - c_exp_val
+            if gap_yrs <= 0:
+                exp_pts = 10
+            elif gap_yrs == 1:
+                exp_pts = 5
+            elif gap_yrs == 2:
+                exp_pts = 0
+            else:
+                exp_pts = -15
 
-            calculated_score = min(int(max_domain_score), domain_pts + skill_pts + title_pts + exp_pts)
+            calculated_score = max(0, min(effective_max_score, domain_pts + skill_pts + title_pts + exp_pts))
 
             # Semantic Sanity Gate: never allow >= 70% if zero skills AND zero meaningful title tokens matched
             if not matched and title_hits == 0:
@@ -298,7 +334,7 @@ Post Content:
                 strengths.append(f"Direct role alignment with {candidate_profile.get('primary_title')}.")
             else:
                 strengths.append(f"Limited direct skill overlap with {job_structured.get('title', 'this posting')}.")
-            strengths.append(f"Experience alignment: {c_exp} years vs {j_exp}+ years required.")
+            strengths.append(f"Experience alignment: {c_exp_val} years vs {j_exp_val}+ years required.")
 
             missing = [s for s in job_skills if not any(cs in s or s in cs for cs in cand_skills)]
             gap = f"Prepare to discuss hands-on experience with {missing[0]}." if missing else "Emphasize specific portfolio projects and measurable outcomes."
@@ -345,9 +381,9 @@ Respond ONLY with valid JSON.
             raw = re.sub(r"^```(?:json)?\s*", "", raw.strip())
             raw = re.sub(r"\s*```$", "", raw)
             parsed = json.loads(raw)
-            # Ensure score does not breach max domain compatibility
-            if parsed.get("match_score", 0) > max_domain_score:
-                parsed["match_score"] = int(max_domain_score)
+            # Ensure score does not breach domain or experience constraints
+            if parsed.get("match_score", 0) > effective_max_score:
+                parsed["match_score"] = int(effective_max_score)
             return parsed
         except Exception as e:
             logger.error(f"Error evaluating match precision: {e}")

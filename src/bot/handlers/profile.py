@@ -244,7 +244,7 @@ async def handle_job_matches_button(message: Message, lang: str, i18n: I18nManag
             structured_info = job.structured_data or {}
             job_type = structured_info.get("employment_type", "Full-time")
             req_skills = structured_info.get("required_skills", [])
-            skills_display = ", ".join(req_skills[:8]) if req_skills else "Engineering & Technical Skills"
+            skills_display = ", ".join(req_skills[:8]) if req_skills else "Role & Domain Competencies"
             salary = structured_info.get("salary_range", "Negotiable")
             exp_years = structured_info.get("required_experience_years")
             exp_display = f"{exp_years}+ years" if exp_years else "Open / Fresh Graduate"

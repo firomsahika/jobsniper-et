@@ -79,7 +79,7 @@ class AlertDispatcher:
         salary = job_data.get('salary_range') or structured_info.get('salary_range', 'Negotiable')
         job_type = job_data.get('job_type') or structured_info.get('employment_type', 'Full-time')
         req_skills = job_data.get('required_skills') or structured_info.get('required_skills', [])
-        skills_display = ", ".join(req_skills[:8]) if req_skills else "Modern Development & Domain Skills"
+        skills_display = ", ".join(req_skills[:8]) if req_skills else "Role & Domain Competencies"
         exp_years = job_data.get('required_experience_years') or structured_info.get('required_experience_years')
         exp_display = f"{exp_years}+ years" if exp_years else "Open / Fresh Graduate"
 

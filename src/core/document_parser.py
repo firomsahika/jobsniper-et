@@ -322,7 +322,12 @@ class DocumentParser:
             "Flutter", "Android", "Dart", "iOS", "Swift", "Kotlin", "React Native",
             "Machine Learning", "Data Analysis", "Deep Learning", "TensorFlow", "PyTorch",
             "Network Administration", "Cisco", "CCNA", "Network Security", "Cybersecurity",
-            "Civil Engineering", "AutoCAD", "Structural Analysis", "Project Management"
+            "Civil Engineering", "AutoCAD", "Structural Analysis", "Project Management",
+            "Marketing", "Sales", "Business Development", "Digital Marketing", "Branding",
+            "Client Relations", "Proposal Writing", "Operations Management", "Strategic Planning",
+            "Supply Chain", "Logistics", "Procurement", "Human Resources", "Recruitment",
+            "Customer Service", "Adobe Photoshop", "Adobe Illustrator", "Video Editing",
+            "Graphic Design", "Nursing", "Clinical Care", "Public Health", "Pharmacy"
         ]
         for s in catalog:
             if re.search(r'(?<!\w)' + re.escape(s) + r'(?!\w)', raw_text, re.I):
